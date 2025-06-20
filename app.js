@@ -28,6 +28,8 @@ const upload = multer({
 // Middleware keamanan
 app.use(secure);
 
+app.set("view engine", "ejs");
+
 // Middleware untuk folder statis
 app.use(express.static('public'));
 app.use('/processed', express.static('processed'));
