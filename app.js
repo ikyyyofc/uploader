@@ -109,8 +109,8 @@ app.post('/split-video', (req, res) => {
 
         await new Promise((resolve, reject) => {
           ffmpeg(inputPath)
-            .setStartTime(startTime)
-            .setDuration(60)
+            .seek(startTime)
+            .duration(60)
             .videoCodec('copy')
             .audioCodec('copy')
             .output(outputPath)
