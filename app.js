@@ -68,8 +68,7 @@ app.post('/upload', (req, res) => {
   upload(req, res, async (err) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!req.file) return res.status(400).json({ error: 'Tidak ada file diunggah' });
-    if (!validateVideoFile(req.file)) return res.status(400).json({ error: 'Hanya file video yang diperbolehkan' });
-
+    
     await cleanupUploads();
     const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
     res.json({ message: 'File diunggah!', fileUrl });
