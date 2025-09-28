@@ -7,83 +7,85 @@ const secure = require("ssl-express-www");
 const app = express();
 const port = 7860;
 
-// Set storage engine
+// Storage engine
 const storage = multer.diskStorage({
-    destination: "./uploads/",
-    filename: function (req, file, cb) {
-        cb(
-            null,
-            file.fieldname + "-" + Date.now() + path.extname(file.originalname)
-        );
+  destination: "./uploads/",
+  filename: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, "uploads");
+
+    function generateName() {
+      const randomStr = Math.random().toString(36).substring(2, 6); // 4 char random
+      const timeStr = Date.now().toString(36); // timestamp pendek
+      return timeStr + "-" + randomStr + path.extname(file.originalname);
     }
+
+    let filename = generateName();
+
+    // cek biar ga nabrak
+    while (fs.existsSync(path.join(uploadDir, filename))) {
+      filename = generateName();
+    }
+
+    cb(null, filename);
+  }
 });
 
 // Initialize upload
-const upload = multer({
-    storage: storage
-}).single("file");
+const upload = multer({ storage: storage }).single("file");
 
-// Set Connection secure
+// secure connection
 app.use(secure);
-// Set view engine
+
+// view engine
 app.set("view engine", "ejs");
 
-// Set static folder
+// static folder
 app.use(express.static("./public"));
 
-// Route untuk menampilkan formulir pengunggahan
+// form upload
 app.get("/", (req, res) => res.render("index", { msg: null, file: null }));
 
-// Route untuk menangani pengunggahan file
+// upload route
 app.post("/upload", (req, res) => {
-    upload(req, res, err => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        } else {
-            if (req.file == undefined) {
-                return res
-                    .status(400)
-                    .json({ error: "Error: Tidak Ada File yang Dipilih!" });
-            } else {
-                const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${
-                    req.file.filename
-                }`;
+  upload(req, res, err => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    } else {
+      if (req.file == undefined) {
+        return res
+          .status(400)
+          .json({ error: "Error: Tidak Ada File yang Dipilih!" });
+      } else {
+        const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
 
-                // Hapus semua file jika ukuran folder "uploads" mencapai 300 MB
-                const uploadDir = path.join(__dirname, "uploads");
-                const maxUploadSize = 300 * 1024 * 1024; // 300 MB
+        // hapus file yg lebih dari 7 hari
+        const uploadDir = path.join(__dirname, "uploads");
+        const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 hari
 
-                fs.readdir(uploadDir, (err, files) => {
-                    if (err) throw err;
+        fs.readdir(uploadDir, (err, files) => {
+          if (err) throw err;
 
-                    let totalSize = 0;
+          files.forEach(file => {
+            const filePath = path.join(uploadDir, file);
+            const stats = fs.statSync(filePath);
+            const now = Date.now();
 
-                    files.forEach(file => {
-                        const filePath = path.join(uploadDir, file);
-                        const stats = fs.statSync(filePath);
-                        totalSize += stats.size;
-                    });
-
-                    if (totalSize > maxUploadSize) {
-                        // Hapus semua file dalam folder "uploads"
-                        files.forEach(file => {
-                            const filePath = path.join(uploadDir, file);
-                            fs.unlinkSync(filePath);
-                        });
-                    }
-
-                    // Kirim respon JSON
-                    return res.status(200).json({
-                        message: "File Diunggah!",
-                        fileUrl: fileUrl
-                    });
-                });
+            if (now - stats.mtimeMs > maxAge) {
+              fs.unlinkSync(filePath);
             }
-        }
-    });
+          });
+
+          return res.status(200).json({
+            message: "File Diunggah!",
+            fileUrl: fileUrl
+          });
+        });
+      }
+    }
+  });
 });
 
-// Middleware untuk menangani file statis
+// akses uploads
 app.use("/uploads", express.static("uploads"));
 
-app.listen(port, () => console.log(`Server started on port ${port}`));
+app.listen(port, () => console.log(`Server jalan di port ${port}`));
