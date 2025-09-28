@@ -4,19 +4,550 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>File Uploader</title>
+  <title>🚀 File Uploader Canggih & Animatif</title>
+  <!-- Google Fonts: Inter - Modern & Clean -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0PzGcASaYj0K3N2b5eYySjRzXF5O5dC+2/2hIeGzCgL8f5d0l+z5gR8w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    /* CSS Variables buat gampang ganti tema */
+    :root {
+      --primary-color: #6C63FF; /* Lavender/Violet */
+      --secondary-color: #8C7AE6; /* Lighter violet */
+      --background-color: #F8F9FA; /* Light gray */
+      --card-background: #FFFFFF;
+      --text-color: #343A40;
+      --light-text-color: #6C757D;
+      --border-color: #DEE2E6;
+      --success-color: #28A745;
+      --error-color: #DC3545;
+      --hover-shadow: rgba(108, 99, 255, 0.2);
+    }
+
+    /* Base Styles - biar bersih dari awal */
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #E0BBE4, #957DAD); /* Background gradient lembut */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text-color);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased; /* Font rendering lebih halus */
+      -moz-osx-font-smoothing: grayscale;
+      overflow: hidden; /* Biar ga ada scrollbar saat animasi */
+    }
+
+    /* Keyframe Animations */
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes slideInFromTop {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseShadow {
+      0% {
+        box-shadow: 0 0 0 0px var(--hover-shadow);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(108, 99, 255, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0px rgba(108, 99, 255, 0);
+      }
+    }
+
+    /* Container Utama / Card */
+    .container {
+      background-color: var(--card-background);
+      padding: 40px;
+      border-radius: 16px; /* Lebih membulat */
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); /* Shadow lebih dalam dan nyata */
+      text-align: center;
+      max-width: 550px; /* Lebar optimal */
+      width: 90%;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animasi smooth saat di-hover */
+      border: 1px solid var(--border-color); /* Border tipis */
+      animation: fadeInScale 0.6s ease-out forwards; /* Animasi masuk halaman */
+      opacity: 0; /* Mulai tersembunyi untuk animasi */
+    }
+
+    .container:hover {
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2); /* Shadow makin dalam */
+      transform: translateY(-8px) scale(1.005); /* Efek melayang sedikit dan sedikit membesar */
+    }
+
+    /* Judul Halaman */
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 25px;
+      font-weight: 700; /* Lebih tebal */
+      font-size: 2.4em;
+      letter-spacing: -0.5px;
+      display: flex; /* Biar ikon & teks bisa sejajar */
+      align-items: center;
+      justify-content: center;
+      gap: 10px; /* Jarak antara ikon & teks */
+    }
+
+    h1 i {
+      color: var(--secondary-color); /* Warna ikon */
+      transition: transform 0.3s ease; /* Animasi ikon */
+    }
+
+    /* Pesan Alert (Success/Error) */
+    .alert {
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      font-size: 0.95em;
+      border: 1px solid transparent;
+      display: flex;
+      align-items: flex-start; /* Ikon di atas, teks di bawah */
+      gap: 10px;
+      word-break: break-word; /* Biar URL panjang ga jebol */
+      text-align: left;
+      animation: slideInFromTop 0.4s ease-out forwards; /* Animasi alert masuk */
+      opacity: 0;
+    }
+
+    .alert i {
+      font-size: 1.2em;
+      margin-top: 2px; /* Rapiin posisi ikon */
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      color: var(--success-color);
+      border-color: #c3e6cb;
+    }
+
+    .alert-error {
+      background-color: #f8d7da;
+      color: var(--error-color);
+      border-color: #f5c6cb;
+    }
+
+    .file-url-link {
+      color: var(--primary-color);
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .file-url-link:hover {
+      color: var(--secondary-color);
+      text-decoration: underline;
+    }
+
+    /* Zona Upload File (Drag & Drop) */
+    .upload-zone {
+      border: 2px dashed var(--border-color); /* Border putus-putus */
+      background-color: #FDFEFE;
+      padding: 30px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px; /* Tinggi minimum biar keliatan */
+    }
+
+    .upload-zone.drag-over { /* Efek saat file di-drag ke atas zona */
+      border-color: var(--primary-color);
+      background-color: #EFF2FF;
+      box-shadow: 0 0 0 4px var(--hover-shadow); /* Shadow highlight */
+      animation: pulseShadow 1s infinite ease-out; /* Animasi pulse */
+    }
+
+    .upload-zone input[type="file"] { /* Input file asli disembunyiin */
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 10; /* Biar bisa diklik/di-drop */
+    }
+
+    .upload-zone .icon {
+      font-size: 3em;
+      color: var(--light-text-color);
+      margin-bottom: 15px;
+      transition: color 0.3s ease, transform 0.3s ease; /* Transisi untuk ikon */
+    }
+
+    .upload-zone:hover .icon {
+      color: var(--primary-color); /* Ikon berubah warna saat hover */
+      transform: translateY(-5px) scale(1.05); /* Efek naik dan sedikit membesar */
+    }
+
+    .upload-zone p {
+      margin: 0;
+      font-size: 1.1em;
+      color: var(--light-text-color);
+      font-weight: 500;
+    }
+
+    .upload-zone span {
+      font-size: 0.9em;
+      color: var(--light-text-color);
+      margin-top: 5px;
+    }
+
+    /* Area Preview File yang Dipilih */
+    .file-preview-area {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #F2F4F7;
+      border-radius: 10px;
+      border: 1px solid #E4E7EB;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      text-align: left;
+      opacity: 0; /* Awalnya sembunyi */
+      max-height: 0; /* Awalnya sembunyi */
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animasi muncul lebih smooth */
+    }
+
+    .file-preview-area.show { /* Kelas untuk menampilkan area preview */
+      opacity: 1;
+      max-height: 100px; /* Tinggi maksimal saat tampil */
+      padding: 15px;
+      margin-bottom: 20px; /* Ada margin di bawah saat muncul */
+    }
+
+    .file-preview-area img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover; /* Biar gambar pas */
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .file-preview-area .preview-info {
+      flex-grow: 1; /* Ambil sisa ruang */
+    }
+
+    .file-preview-area .file-name {
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 5px;
+      word-break: break-all; /* Biar nama file panjang ga jebol */
+    }
+
+    .file-preview-area .file-size {
+      font-size: 0.85em;
+      color: var(--light-text-color);
+    }
+
+    .file-preview-area .remove-file { /* Tombol hapus file */
+      background: none;
+      border: none;
+      color: var(--error-color);
+      cursor: pointer;
+      font-size: 1.2em;
+      opacity: 0.7;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .file-preview-area .remove-file:hover {
+      opacity: 1;
+      transform: scale(1.1); /* Efek membesar saat hover */
+    }
+
+    /* Tombol Upload */
+    .submit-button {
+      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); /* Gradient warna */
+      color: white;
+      padding: 16px 30px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.15em;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      width: 100%;
+      letter-spacing: 0.5px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Shadow tombol */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .submit-button:hover {
+      transform: translateY(-3px); /* Efek naik saat hover */
+      box-shadow: 0 8px 20px var(--hover-shadow);
+      opacity: 0.95;
+    }
+
+    .submit-button:active {
+      transform: translateY(0) scale(0.98); /* Efek ditekan sedikit */
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .submit-button i {
+      font-size: 1.2em;
+    }
+
+    .submit-button:disabled { /* Styling saat tombol disabled */
+      background: #ced4da;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+      opacity: 0.7; /* Sedikit transparan */
+    }
+
+    /* Loader/Spinner untuk tombol */
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid #fff;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: none; /* Awalnya disembunyikan */
+    }
+
+    .submit-button.loading .spinner { /* Tampil saat loading */
+      display: block;
+    }
+
+    .submit-button.loading span { /* Text disembunyikan saat loading */
+      display: none;
+    }
+
+    @keyframes spin { /* Animasi putar spinner */
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive adjustments untuk layar kecil */
+    @media (max-width: 600px) {
+      .container {
+        padding: 30px 20px;
+        margin: 20px; /* Tambah margin biar ga terlalu mepet */
+      }
+      h1 {
+        font-size: 2em;
+      }
+      .upload-zone {
+        padding: 20px;
+      }
+      .upload-zone p {
+        font-size: 1em;
+      }
+      .submit-button {
+        padding: 14px 20px;
+        font-size: 1.05em;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>File Uploader</h1>
-  <% if (msg) { %>
-    <p><%= msg %></p>
-    <% if (file) { %>
-      <p>File URL: <%= file %></p>
+  <div class="container">
+    <h1><i class="fas fa-cloud-upload-alt"></i> Unggah File Kerenmu!</h1>
+
+    <% if (msg) { %>
+      <div class="alert <%= msg.includes('sukses') ? 'alert-success' : 'alert-error' %>" role="alert">
+        <i class="fas <%= msg.includes('sukses') ? 'fa-check-circle' : 'fa-exclamation-triangle' %>"></i>
+        <div>
+          <%= msg %>
+          <% if (file) { %>
+            <br><span class="file-url">URL: <a href="<%= file %>" target="_blank" class="file-url-link"><%= file %></a></span>
+          <% } %>
+        </div>
+      </div>
     <% } %>
-  <% } %>
-  <form action="/upload" method="POST" enctype="multipart/form-data">
-    <input type="file" name="file">
-    <button type="submit">Upload</button>
-  </form>
+
+    <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+      <!-- Drag & Drop Zone -->
+      <div class="upload-zone" id="dropZone">
+        <input type="file" name="file" id="fileInput" accept="image/*, application/pdf, .doc, .docx" />
+        <i class="fas fa-file-upload icon"></i>
+        <p>Seret & Lepas File di Sini</p>
+        <span>atau Klik untuk Memilih File</span>
+      </div>
+
+      <!-- Area Preview File -->
+      <div class="file-preview-area" id="filePreviewArea">
+        <img src="" alt="File Preview" id="previewImage">
+        <div class="preview-info">
+          <div class="file-name" id="previewFileName"></div>
+          <div class="file-size" id="previewFileSize"></div>
+        </div>
+        <button type="button" class="remove-file" id="removeFileButton"><i class="fas fa-times-circle"></i></button>
+      </div>
+
+      <!-- Tombol Upload -->
+      <button type="submit" class="submit-button" id="submitButton" disabled>
+        <span id="buttonText">Upload Sekarang</span>
+        <div class="spinner" id="buttonSpinner"></div>
+      </button>
+    </form>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const filePreviewArea = document.getElementById('filePreviewArea');
+    const previewImage = document.getElementById('previewImage');
+    const previewFileName = document.getElementById('previewFileName');
+    const previewFileSize = document.getElementById('previewFileSize');
+    const removeFileButton = document.getElementById('removeFileButton');
+    const submitButton = document.getElementById('submitButton');
+    const buttonText = document.getElementById('buttonText');
+    const buttonSpinner = document.getElementById('buttonSpinner');
+    const uploadForm = document.getElementById('uploadForm');
+
+    // Menghindari perilaku default browser untuk drag & drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, preventDefaults, false);
+      document.body.addEventListener(eventName, preventDefaults, false); // Untuk seluruh body
+    });
+
+    function preventDefaults (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // Efek highlight saat file di-drag ke atas zona
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+      dropZone.classList.add('drag-over');
+    }
+
+    function unhighlight(e) {
+      dropZone.classList.remove('drag-over');
+    }
+
+    // Menangani file yang di-drop
+    dropZone.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFiles(files);
+    }
+
+    // Menangani file yang dipilih lewat input biasa
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+
+    // Fungsi utama untuk memproses file yang dipilih
+    function handleFiles(files) {
+      if (files.length > 0) {
+        const file = files[0];
+        displayFile(file); // Tampilkan preview
+        // Set file ke elemen input agar bisa disubmit
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+        submitButton.disabled = false; // Aktifkan tombol upload
+      } else {
+        resetFileSelection(); // Reset jika tidak ada file
+      }
+    }
+
+    // Menampilkan informasi dan preview file
+    function displayFile(file) {
+      previewFileName.textContent = file.name;
+      previewFileSize.textContent = formatBytes(file.size);
+
+      // Cek jika file adalah gambar, tampilkan preview gambar
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previewImage.src = e.target.result;
+          previewImage.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewImage.style.display = 'none'; // Sembunyikan jika bukan gambar
+        // Bisa tambahkan ikon default untuk tipe file lain di sini (misal: PDF, DOC)
+        // Untuk sekarang, kita biarkan kosong jika bukan gambar
+      }
+      filePreviewArea.classList.add('show'); // Tampilkan area preview
+    }
+
+    // Menghapus file yang dipilih
+    removeFileButton.addEventListener('click', () => {
+      resetFileSelection();
+    });
+
+    function resetFileSelection() {
+      fileInput.value = ''; // Hapus nilai input file
+      filePreviewArea.classList.remove('show'); // Sembunyikan area preview
+      // Beri sedikit delay sebelum menghapus src agar transisi lebih mulus
+      setTimeout(() => {
+        previewImage.src = '';
+        previewFileName.textContent = '';
+        previewFileSize.textContent = '';
+      }, 400); // Sesuaikan dengan durasi transisi .file-preview-area
+      submitButton.disabled = true; // Nonaktifkan tombol upload
+    }
+
+    // Format ukuran byte biar lebih mudah dibaca
+    function formatBytes(bytes, decimals = 2) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    // Animasi saat form disubmit (simulasi loading)
+    uploadForm.addEventListener('submit', () => {
+      submitButton.disabled = true;
+      submitButton.classList.add('loading'); // Tampilkan spinner
+    });
+
+    // Cek kondisi awal saat halaman dimuat (misal setelah refresh ada pesan error/success)
+    document.addEventListener('DOMContentLoaded', () => {
+      if (<%= msg ? 'true' : 'false' %>) {
+        // Jika ada pesan, tombol upload tetap nonaktif sampai user pilih file baru
+        submitButton.disabled = true;
+      } else {
+        // Jika tidak ada pesan, tombol upload nonaktif sampai user pilih file
+        submitButton.disabled = true;
+      }
+    });
+  </script>
 </body>
 </html>
