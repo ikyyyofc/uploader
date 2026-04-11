@@ -56,7 +56,7 @@ app.post("/upload", (req, res) => {
           .status(400)
           .json({ error: "Error: Tidak Ada File yang Dipilih!" });
       } else {
-        const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+        const fileUrl = `https://${req.get("host")}/uploads/${req.file.filename}`;
 
         // hapus file yg lebih dari 7 hari
         const uploadDir = path.join(__dirname, "uploads");
