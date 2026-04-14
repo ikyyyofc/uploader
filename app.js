@@ -112,7 +112,17 @@ app.post("/upload", (req, res) => {
   });
 });
 
-// akses uploads
-app.use("/uploads", express.static("uploads"));
+// akses uploads dengan paksa download
+app.get("/uploads/:filename", (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, "uploads", filename);
+
+  // pastikan file ada
+  if (fs.existsSync(filePath)) {
+    res.download(filePath);
+  } else {
+    res.status(404).send("File tidak ditemukan");
+  }
+});
 
 app.listen(port, () => console.log(`Server jalan di port ${port}`));
