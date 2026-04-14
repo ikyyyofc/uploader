@@ -45,6 +45,33 @@ app.use(express.static("./public"));
 // form upload
 app.get("/", (req, res) => res.render("index", { msg: null, file: null }));
 
+// list files
+app.get("/files", (req, res) => {
+  const uploadDir = path.join(__dirname, "uploads");
+  fs.readdir(uploadDir, (err, files) => {
+    if (err) {
+      return res.status(500).render("index", { msg: "Error: Gagal membaca direktori upload", file: null });
+    }
+
+    const fileList = files
+      .filter(file => file !== ".gitkeep")
+      .map(file => {
+        const filePath = path.join(uploadDir, file);
+        const stats = fs.statSync(filePath);
+        return {
+          name: file,
+          size: (stats.size / 1024).toFixed(2) + " KB",
+          atime: stats.atime,
+          mtime: stats.mtime,
+          url: `/uploads/${file}`
+        };
+      })
+      .sort((a, b) => b.mtime - a.mtime);
+
+    res.render("files", { files: fileList });
+  });
+});
+
 // upload route
 app.post("/upload", (req, res) => {
   upload(req, res, err => {

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📁 Daftar File Terunggah</title>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    :root {
+      --primary-color: #6C63FF;
+      --secondary-color: #8C7AE6;
+      --background-color: #F8F9FA;
+      --card-background: #FFFFFF;
+      --text-color: #343A40;
+      --light-text-color: #6C757D;
+      --border-color: #DEE2E6;
+      --hover-shadow: rgba(108, 99, 255, 0.2);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #E0BBE4, #957DAD);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 40px 20px;
+      color: var(--text-color);
+      box-sizing: border-box;
+    }
+
+    .container {
+      background-color: var(--card-background);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      max-width: 800px;
+      width: 100%;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 30px;
+      font-weight: 700;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 20px;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--secondary-color);
+    }
+
+    .file-list {
+      display: grid;
+      gap: 15px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      background-color: #FDFEFE;
+    }
+
+    .file-item:hover {
+      transform: translateX(5px);
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 12px var(--hover-shadow);
+    }
+
+    .file-icon {
+      font-size: 2em;
+      color: var(--light-text-color);
+      margin-right: 20px;
+      width: 40px;
+      text-align: center;
+    }
+
+    .file-info {
+      flex-grow: 1;
+    }
+
+    .file-name {
+      font-weight: 600;
+      color: var(--text-color);
+      word-break: break-all;
+      margin-bottom: 4px;
+    }
+
+    .file-meta {
+      font-size: 0.85em;
+      color: var(--light-text-color);
+    }
+
+    .file-actions {
+      margin-left: 20px;
+    }
+
+    .view-btn {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9em;
+      transition: background-color 0.2s;
+    }
+
+    .view-btn:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--light-text-color);
+    }
+
+    .empty-state i {
+      font-size: 3em;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 25px 15px; }
+      .file-item { flex-direction: column; align-items: flex-start; }
+      .file-icon { margin-bottom: 10px; margin-right: 0; }
+      .file-actions { margin-left: 0; margin-top: 15px; width: 100%; }
+      .view-btn { display: block; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Kembali ke Unggah</a>
+    
+    <h1><i class="fas fa-folder-open"></i> File yang Diunggah</h1>
+
+    <% if (files && files.length > 0) { %>
+      <div class="file-list">
+        <% files.forEach(file => { %>
+          <div class="file-item">
+            <div class="file-icon">
+              <% if (file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)) { %>
+                <i class="fas fa-file-image"></i>
+              <% } else if (file.name.match(/\.pdf$/i)) { %>
+                <i class="fas fa-file-pdf"></i>
+              <% } else if (file.name.match(/\.(doc|docx)$/i)) { %>
+                <i class="fas fa-file-word"></i>
+              <% } else { %>
+                <i class="fas fa-file-alt"></i>
+              <% } %>
+            </div>
+            <div class="file-info">
+              <div class="file-name"><%= file.name %></div>
+              <div class="file-meta">
+                <span><i class="fas fa-hdd"></i> <%= file.size %></span> &bull; 
+                <span><i class="fas fa-clock"></i> <%= new Date(file.mtime).toLocaleString('id-ID') %></span>
+              </div>
+            </div>
+            <div class="file-actions">
+              <a href="<%= file.url %>" target="_blank" class="view-btn"><i class="fas fa-external-link-alt"></i> Lihat</a>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="empty-state">
+        <i class="fas fa-box-open"></i>
+        <p>Belum ada file yang diunggah.</p>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>
