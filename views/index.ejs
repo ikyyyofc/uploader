@@ -4,58 +4,127 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🚀 File Uploader Canggih & Animatif</title>
-  <!-- Google Fonts: Inter - Modern & Clean -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>🚀 Ultra File Uploader - Premium & Unlimited</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Space Grotesk -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0PzGcASaYj0K3N2b5eYySjRzXF5O5dC+2/2hIeGzCgL8f5d0l+z5gR8w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-    /* CSS Variables buat gampang ganti tema */
+    /* Premium CSS Variables - Aurora Neon Dark Mode */
     :root {
-      --primary-color: #6C63FF; /* Lavender/Violet */
-      --secondary-color: #8C7AE6; /* Lighter violet */
-      --background-color: #F8F9FA; /* Light gray */
-      --card-background: #FFFFFF;
-      --text-color: #343A40;
-      --light-text-color: #6C757D;
-      --border-color: #DEE2E6;
-      --success-color: #28A745;
-      --error-color: #DC3545;
-      --hover-shadow: rgba(108, 99, 255, 0.2);
+      --primary: #8b5cf6; /* Royal Violet */
+      --primary-rgb: 139, 92, 246;
+      --secondary: #ec4899; /* Hot Pink */
+      --secondary-rgb: 236, 72, 153;
+      --accent: #06b6d4; /* Neon Cyan */
+      --accent-rgb: 6, 182, 212;
+      --bg: #030712;
+      --card-bg: rgba(17, 24, 39, 0.55);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --success: #10b981;
+      --success-rgb: 16, 185, 129;
+      --error: #ef4444;
+      --error-rgb: 239, 68, 68;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* Base Styles - biar bersih dari awal */
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #E0BBE4, #957DAD); /* Background gradient lembut */
+      font-family: var(--font-body);
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.15) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      margin: 0;
-      color: var(--text-color);
+      color: var(--text-main);
       line-height: 1.6;
-      -webkit-font-smoothing: antialiased; /* Font rendering lebih halus */
-      -moz-osx-font-smoothing: grayscale;
-      overflow: hidden; /* Biar ga ada scrollbar saat animasi */
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Floating Aurora Blobs (Animations) */
+    .aurora-container {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(140px);
+      opacity: 0.35;
+      mix-blend-mode: screen;
+      animation: floatBlob 25s infinite alternate ease-in-out;
+    }
+
+    .blob-1 {
+      width: 450px;
+      height: 450px;
+      background: var(--primary);
+      top: -10%;
+      left: -10%;
+      animation-duration: 22s;
+    }
+
+    .blob-2 {
+      width: 500px;
+      height: 500px;
+      background: var(--secondary);
+      bottom: -15%;
+      right: -10%;
+      animation-duration: 28s;
+    }
+
+    .blob-3 {
+      width: 350px;
+      height: 350px;
+      background: var(--accent);
+      top: 40%;
+      left: 60%;
+      animation-duration: 18s;
+    }
+
+    @keyframes floatBlob {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+      50% { transform: translate(60px, -40px) scale(1.15) rotate(180deg); }
+      100% { transform: translate(-40px, 50px) scale(0.9) rotate(360deg); }
     }
 
     /* Keyframe Animations */
-    @keyframes fadeInScale {
+    @keyframes cardEntrance {
       from {
         opacity: 0;
-        transform: scale(0.95) translateY(20px);
+        transform: translateY(40px) scale(0.96);
       }
       to {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: translateY(0) scale(1);
       }
     }
 
-    @keyframes slideInFromTop {
+    @keyframes slideInUp {
       from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(20px);
       }
       to {
         opacity: 1;
@@ -63,127 +132,165 @@
       }
     }
 
-    @keyframes pulseShadow {
-      0% {
-        box-shadow: 0 0 0 0px var(--hover-shadow);
-      }
-      70% {
-        box-shadow: 0 0 0 10px rgba(108, 99, 255, 0);
-      }
-      100% {
-        box-shadow: 0 0 0 0px rgba(108, 99, 255, 0);
-      }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.15); }
+      50% { box-shadow: 0 0 35px rgba(139, 92, 246, 0.3); }
     }
 
-    /* Container Utama / Card */
+    /* Container Glassmorphism Card */
     .container {
-      background-color: var(--card-background);
-      padding: 40px;
-      border-radius: 16px; /* Lebih membulat */
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); /* Shadow lebih dalam dan nyata */
+      background: var(--card-bg);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      padding: 50px 45px;
+      border-radius: 24px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5);
       text-align: center;
-      max-width: 550px; /* Lebar optimal */
-      width: 90%;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animasi smooth saat di-hover */
-      border: 1px solid var(--border-color); /* Border tipis */
-      animation: fadeInScale 0.6s ease-out forwards; /* Animasi masuk halaman */
-      opacity: 0; /* Mulai tersembunyi untuk animasi */
+      max-width: 580px;
+      width: 92%;
+      z-index: 10;
+      position: relative;
+      animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      overflow: hidden;
     }
 
-    .container:hover {
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2); /* Shadow makin dalam */
-      transform: translateY(-8px) scale(1.005); /* Efek melayang sedikit dan sedikit membesar */
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
     }
 
-    /* Judul Halaman */
+    /* Page Title */
     h1 {
-      color: var(--primary-color);
-      margin-bottom: 25px;
-      font-weight: 700; /* Lebih tebal */
-      font-size: 2.4em;
+      font-family: var(--font-display);
+      font-size: 2.3em;
+      font-weight: 700;
       letter-spacing: -0.5px;
-      display: flex; /* Biar ikon & teks bisa sejajar */
+      background: linear-gradient(135deg, #ffffff 30%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 30px;
+      display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px; /* Jarak antara ikon & teks */
+      gap: 12px;
     }
 
     h1 i {
-      color: var(--secondary-color); /* Warna ikon */
-      transition: transform 0.3s ease; /* Animasi ikon */
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.4));
     }
 
-    /* Pesan Alert (Success/Error) */
+    /* Premium Alert Styles (Frosted Glass Glassmorphism) */
     .alert {
-      padding: 15px 20px;
-      border-radius: 10px;
-      margin-bottom: 25px;
+      padding: 16px 20px;
+      border-radius: 14px;
+      margin-bottom: 28px;
       font-size: 0.95em;
-      border: 1px solid transparent;
       display: flex;
-      align-items: flex-start; /* Ikon di atas, teks di bawah */
-      gap: 10px;
-      word-break: break-word; /* Biar URL panjang ga jebol */
+      align-items: flex-start;
+      gap: 14px;
+      word-break: break-all;
       text-align: left;
-      animation: slideInFromTop 0.4s ease-out forwards; /* Animasi alert masuk */
-      opacity: 0;
-    }
-
-    .alert i {
-      font-size: 1.2em;
-      margin-top: 2px; /* Rapiin posisi ikon */
+      animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      border: 1px solid transparent;
+      backdrop-filter: blur(8px);
     }
 
     .alert-success {
-      background-color: #d4edda;
-      color: var(--success-color);
-      border-color: #c3e6cb;
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.25);
+      color: #34d399;
+      box-shadow: 0 8px 20px -5px rgba(16, 185, 129, 0.15);
     }
 
     .alert-error {
-      background-color: #f8d7da;
-      color: var(--error-color);
-      border-color: #f5c6cb;
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+      box-shadow: 0 8px 20px -5px rgba(239, 68, 68, 0.15);
+    }
+
+    .alert i {
+      font-size: 1.25em;
+      margin-top: 2px;
     }
 
     .file-url-link {
-      color: var(--primary-color);
-      font-weight: 500;
+      color: var(--accent);
+      font-weight: 600;
       text-decoration: none;
-      transition: color 0.2s ease;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .file-url-link:hover {
-      color: var(--secondary-color);
+      color: #22d3ee;
       text-decoration: underline;
     }
 
-    /* Zona Upload File (Drag & Drop) */
+    /* Advanced Drag & Drop Zone */
     .upload-zone {
-      border: 2px dashed var(--border-color); /* Border putus-putus */
-      background-color: #FDFEFE;
-      padding: 30px;
-      border-radius: 12px;
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.02);
+      padding: 40px 30px;
+      border-radius: 16px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 180px; /* Tinggi minimum biar keliatan */
+      min-height: 200px;
     }
 
-    .upload-zone.drag-over { /* Efek saat file di-drag ke atas zona */
-      border-color: var(--primary-color);
-      background-color: #EFF2FF;
-      box-shadow: 0 0 0 4px var(--hover-shadow); /* Shadow highlight */
-      animation: pulseShadow 1s infinite ease-out; /* Animasi pulse */
+    .upload-zone::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      padding: 2px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.4s ease;
     }
 
-    .upload-zone input[type="file"] { /* Input file asli disembunyiin */
+    .upload-zone:hover {
+      border-color: transparent;
+      background: rgba(255, 255, 255, 0.04);
+      transform: translateY(-2px);
+    }
+
+    .upload-zone:hover::before {
+      opacity: 0.6;
+    }
+
+    .upload-zone.drag-over {
+      border-color: transparent;
+      background: rgba(139, 92, 246, 0.08);
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+
+    .upload-zone.drag-over::before {
+      opacity: 1;
+    }
+
+    .upload-zone input[type="file"] {
       position: absolute;
       width: 100%;
       height: 100%;
@@ -191,189 +298,264 @@
       left: 0;
       opacity: 0;
       cursor: pointer;
-      z-index: 10; /* Biar bisa diklik/di-drop */
+      z-index: 10;
     }
 
     .upload-zone .icon {
-      font-size: 3em;
-      color: var(--light-text-color);
-      margin-bottom: 15px;
-      transition: color 0.3s ease, transform 0.3s ease; /* Transisi untuk ikon */
+      font-size: 3.5em;
+      background: linear-gradient(135deg, #c084fc, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 18px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      filter: drop-shadow(0 4px 10px rgba(139, 92, 246, 0.2));
     }
 
     .upload-zone:hover .icon {
-      color: var(--primary-color); /* Ikon berubah warna saat hover */
-      transform: translateY(-5px) scale(1.05); /* Efek naik dan sedikit membesar */
+      transform: translateY(-8px) scale(1.08);
+      filter: drop-shadow(0 6px 15px rgba(139, 92, 246, 0.35));
     }
 
     .upload-zone p {
       margin: 0;
-      font-size: 1.1em;
-      color: var(--light-text-color);
-      font-weight: 500;
+      font-size: 1.15em;
+      color: var(--text-main);
+      font-weight: 600;
+      letter-spacing: -0.2px;
     }
 
     .upload-zone span {
       font-size: 0.9em;
-      color: var(--light-text-color);
-      margin-top: 5px;
+      color: var(--text-muted);
+      margin-top: 6px;
     }
 
-    /* Area Preview File yang Dipilih */
+    /* Premium File Preview Area */
     .file-preview-area {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: #F2F4F7;
-      border-radius: 10px;
-      border: 1px solid #E4E7EB;
+      margin-top: 15px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 16px;
       text-align: left;
-      opacity: 0; /* Awalnya sembunyi */
-      max-height: 0; /* Awalnya sembunyi */
+      opacity: 0;
+      max-height: 0;
       overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animasi muncul lebih smooth */
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .file-preview-area.show { /* Kelas untuk menampilkan area preview */
+    .file-preview-area.show {
       opacity: 1;
-      max-height: 100px; /* Tinggi maksimal saat tampil */
-      padding: 15px;
-      margin-bottom: 20px; /* Ada margin di bawah saat muncul */
+      max-height: 110px;
+      padding: 16px;
+      margin-bottom: 25px;
     }
 
     .file-preview-area img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover; /* Biar gambar pas */
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
+      width: 58px;
+      height: 58px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background-color: rgba(0, 0, 0, 0.2);
     }
 
     .file-preview-area .preview-info {
-      flex-grow: 1; /* Ambil sisa ruang */
+      flex-grow: 1;
+      min-width: 0; /* Hindari overflow teks */
     }
 
     .file-preview-area .file-name {
       font-weight: 600;
-      color: var(--text-color);
-      margin-bottom: 5px;
-      word-break: break-all; /* Biar nama file panjang ga jebol */
+      color: var(--text-main);
+      margin-bottom: 4px;
+      font-size: 0.95em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .file-preview-area .file-size {
       font-size: 0.85em;
-      color: var(--light-text-color);
+      color: var(--text-muted);
     }
 
-    .file-preview-area .remove-file { /* Tombol hapus file */
-      background: none;
+    .file-preview-area .remove-file {
+      background: rgba(239, 68, 68, 0.1);
       border: none;
-      color: var(--error-color);
+      color: var(--error);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
       cursor: pointer;
-      font-size: 1.2em;
-      opacity: 0.7;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    .file-preview-area .remove-file:hover {
-      opacity: 1;
-      transform: scale(1.1); /* Efek membesar saat hover */
-    }
-
-    /* Tombol Upload */
-    .submit-button {
-      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); /* Gradient warna */
-      color: white;
-      padding: 16px 30px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 1.15em;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      width: 100%;
-      letter-spacing: 0.5px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Shadow tombol */
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      font-size: 1em;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .submit-button:hover {
-      transform: translateY(-3px); /* Efek naik saat hover */
-      box-shadow: 0 8px 20px var(--hover-shadow);
-      opacity: 0.95;
+    .file-preview-area .remove-file:hover {
+      background: var(--error);
+      color: white;
+      transform: scale(1.1) rotate(90deg);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
-    .submit-button:active {
-      transform: translateY(0) scale(0.98); /* Efek ditekan sedikit */
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    /* Futuristic Submit Button */
+    .submit-button {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 16px 30px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-size: 1.1em;
+      font-weight: 700;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 100%;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.4);
     }
 
-    .submit-button i {
-      font-size: 1.2em;
+    .submit-button::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
     }
 
-    .submit-button:disabled { /* Styling saat tombol disabled */
-      background: #ced4da;
+    .submit-button:hover:not(:disabled)::after {
+      transform: translateX(100%);
+    }
+
+    .submit-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(139, 92, 246, 0.5), 0 0 15px rgba(236, 72, 153, 0.2);
+    }
+
+    .submit-button:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 0 5px 15px -5px rgba(139, 92, 246, 0.4);
+    }
+
+    .submit-button:disabled {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.25);
       cursor: not-allowed;
-      transform: none;
       box-shadow: none;
-      opacity: 0.7; /* Sedikit transparan */
     }
 
-    /* Loader/Spinner untuk tombol */
+    /* Circular Spinner */
     .spinner {
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      border-top: 3px solid #fff;
+      border: 3px solid rgba(255, 255, 255, 0.15);
+      border-top: 3px solid #ffffff;
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-      display: none; /* Awalnya disembunyikan */
-    }
-
-    .submit-button.loading .spinner { /* Tampil saat loading */
-      display: block;
-    }
-
-    .submit-button.loading span { /* Text disembunyikan saat loading */
+      width: 22px;
+      height: 22px;
+      animation: spin 0.8s linear infinite;
       display: none;
     }
 
-    @keyframes spin { /* Animasi putar spinner */
+    .submit-button.loading .spinner {
+      display: block;
+    }
+
+    .submit-button.loading span {
+      display: none;
+    }
+
+    @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
 
-    /* Responsive adjustments untuk layar kecil */
+    /* Bottom Navigation Link */
+    .bottom-nav {
+      margin-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 24px;
+    }
+
+    .bottom-nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .bottom-nav a::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 1.5px;
+      bottom: -3px;
+      left: 0;
+      background: linear-gradient(90deg, var(--accent), var(--primary));
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.3s ease;
+    }
+
+    .bottom-nav a:hover {
+      color: #e2e8f0;
+    }
+
+    .bottom-nav a:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    /* Custom Responsive Styles */
     @media (max-width: 600px) {
       .container {
-        padding: 30px 20px;
-        margin: 20px; /* Tambah margin biar ga terlalu mepet */
+        padding: 35px 25px;
+        margin: 16px;
       }
       h1 {
-        font-size: 2em;
+        font-size: 1.9em;
       }
       .upload-zone {
-        padding: 20px;
+        padding: 30px 20px;
+        min-height: 170px;
       }
       .upload-zone p {
-        font-size: 1em;
+        font-size: 1.05em;
       }
       .submit-button {
         padding: 14px 20px;
-        font-size: 1.05em;
+        font-size: 1em;
       }
     }
   </style>
 </head>
 <body>
+  <!-- Aurora Glow Blobs in Background -->
+  <div class="aurora-container">
+    <div class="aurora-blob blob-1"></div>
+    <div class="aurora-blob blob-2"></div>
+    <div class="aurora-blob blob-3"></div>
+  </div>
+
   <div class="container">
-    <h1><i class="fas fa-cloud-upload-alt"></i> Unggah File Kerenmu!</h1>
+    <h1><i class="fas fa-cloud-upload-alt"></i> Upload Anything</h1>
 
     <% if (msg) { %>
       <div class="alert <%= msg.includes('sukses') ? 'alert-success' : 'alert-error' %>" role="alert">
@@ -381,7 +563,7 @@
         <div>
           <%= msg %>
           <% if (file) { %>
-            <br><span class="file-url">URL: <a href="<%= file %>" target="_blank" class="file-url-link"><%= file %></a></span>
+            <br><span class="file-url">URL: <a href="<%= file %>" target="_blank" class="file-url-link"><%= file %> <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i></a></span>
           <% } %>
         </div>
       </div>
@@ -390,7 +572,7 @@
     <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
       <!-- Drag & Drop Zone -->
       <div class="upload-zone" id="dropZone">
-        <input type="file" name="file" id="fileInput" accept="image/*, application/pdf, .doc, .docx" />
+        <input type="file" name="file" id="fileInput" />
         <i class="fas fa-file-upload icon"></i>
         <p>Seret & Lepas File di Sini</p>
         <span>atau Klik untuk Memilih File</span>

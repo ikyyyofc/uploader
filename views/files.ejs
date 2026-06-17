@@ -4,163 +4,361 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📁 Daftar File Terunggah</title>
-  <!-- Google Fonts: Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>📁 Files Repository - Ultra Uploader</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Space Grotesk -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
+    /* Premium CSS Variables - Aurora Neon Dark Mode */
     :root {
-      --primary-color: #6C63FF;
-      --secondary-color: #8C7AE6;
-      --background-color: #F8F9FA;
-      --card-background: #FFFFFF;
-      --text-color: #343A40;
-      --light-text-color: #6C757D;
-      --border-color: #DEE2E6;
-      --hover-shadow: rgba(108, 99, 255, 0.2);
+      --primary: #8b5cf6; /* Royal Violet */
+      --secondary: #ec4899; /* Hot Pink */
+      --accent: #06b6d4; /* Neon Cyan */
+      --bg: #030712;
+      --card-bg: rgba(17, 24, 39, 0.55);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #E0BBE4, #957DAD);
+      font-family: var(--font-body);
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
       display: flex;
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
-      margin: 0;
-      padding: 40px 20px;
-      color: var(--text-color);
-      box-sizing: border-box;
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 50px 20px;
+      overflow-x: hidden;
+      position: relative;
     }
 
+    /* Floating Aurora Blobs (Animations) */
+    .aurora-container {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(140px);
+      opacity: 0.3;
+      mix-blend-mode: screen;
+      animation: floatBlob 25s infinite alternate ease-in-out;
+    }
+
+    .blob-1 {
+      width: 450px;
+      height: 450px;
+      background: var(--primary);
+      bottom: -10%;
+      left: -10%;
+      animation-duration: 22s;
+    }
+
+    .blob-2 {
+      width: 500px;
+      height: 500px;
+      background: var(--secondary);
+      top: -15%;
+      right: -10%;
+      animation-duration: 28s;
+    }
+
+    @keyframes floatBlob {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+      50% { transform: translate(40px, -60px) scale(1.1) rotate(180deg); }
+      100% { transform: translate(-30px, 40px) scale(0.95) rotate(360deg); }
+    }
+
+    /* Keyframe Animations */
+    @keyframes cardEntrance {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.97);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Container Glassmorphism Card */
     .container {
-      background-color: var(--card-background);
-      padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-      max-width: 800px;
+      background: var(--card-bg);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      padding: 50px 45px;
+      border-radius: 24px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5);
+      max-width: 850px;
       width: 100%;
-      animation: fadeIn 0.6s ease-out;
+      z-index: 10;
+      position: relative;
+      animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--primary), var(--secondary));
     }
 
-    h1 {
-      color: var(--primary-color);
-      margin-bottom: 30px;
-      font-weight: 700;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-    }
-
+    /* Back Link Nav */
     .back-link {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      color: var(--primary-color);
+      color: var(--accent);
       text-decoration: none;
       font-weight: 600;
-      margin-bottom: 20px;
-      transition: color 0.2s;
+      font-size: 0.95em;
+      margin-bottom: 30px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .back-link::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 1.5px;
+      bottom: -3px;
+      left: 0;
+      background: linear-gradient(90deg, var(--accent), var(--primary));
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.3s ease;
     }
 
     .back-link:hover {
-      color: var(--secondary-color);
+      color: #e2e8f0;
     }
 
+    .back-link:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    /* Title */
+    h1 {
+      font-family: var(--font-display);
+      font-size: 2.3em;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 30%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    h1 i {
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.4));
+    }
+
+    /* File List Grid */
     .file-list {
       display: grid;
-      gap: 15px;
+      gap: 18px;
     }
 
+    /* File Item Card */
     .file-item {
       display: flex;
       align-items: center;
-      padding: 15px;
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      transition: all 0.3s ease;
-      background-color: #FDFEFE;
+      padding: 18px 24px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .file-item:hover {
-      transform: translateX(5px);
-      border-color: var(--primary-color);
-      box-shadow: 0 4px 12px var(--hover-shadow);
+      transform: translateY(-3px) scale(1.01);
+      border-color: rgba(139, 92, 246, 0.3);
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 10px 25px -10px rgba(139, 92, 246, 0.25);
     }
 
+    /* Dynamic File Icons */
     .file-icon {
-      font-size: 2em;
-      color: var(--light-text-color);
-      margin-right: 20px;
-      width: 40px;
+      font-size: 2.3em;
+      margin-right: 22px;
+      width: 45px;
       text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
+    /* Icon Colors based on file type */
+    .file-icon .fa-file-image { color: #fdba74; filter: drop-shadow(0 0 6px rgba(253, 186, 116, 0.3)); }
+    .file-icon .fa-file-pdf { color: #fca5a5; filter: drop-shadow(0 0 6px rgba(252, 165, 165, 0.3)); }
+    .file-icon .fa-file-word { color: #93c5fd; filter: drop-shadow(0 0 6px rgba(147, 197, 253, 0.3)); }
+    .file-icon .fa-file-excel { color: #86efac; filter: drop-shadow(0 0 6px rgba(134, 239, 172, 0.3)); }
+    .file-icon .fa-file-powerpoint { color: #fdba74; filter: drop-shadow(0 0 6px rgba(253, 186, 116, 0.3)); }
+    .file-icon .fa-file-video { color: #d8b4fe; filter: drop-shadow(0 0 6px rgba(216, 180, 254, 0.3)); }
+    .file-icon .fa-file-audio { color: #99f6e4; filter: drop-shadow(0 0 6px rgba(153, 246, 228, 0.3)); }
+    .file-icon .fa-file-archive { color: #fde047; filter: drop-shadow(0 0 6px rgba(253, 224, 71, 0.3)); }
+    .file-icon .fa-file-code { color: #f472b6; filter: drop-shadow(0 0 6px rgba(244, 114, 182, 0.3)); }
+    .file-icon .fa-file-alt { color: #cbd5e1; filter: drop-shadow(0 0 6px rgba(203, 213, 225, 0.3)); }
+
+    /* File Metadata Info */
     .file-info {
       flex-grow: 1;
+      min-width: 0; /* Hindari overflow */
     }
 
     .file-name {
       font-weight: 600;
-      color: var(--text-color);
+      color: var(--text-main);
+      font-size: 1.05em;
+      margin-bottom: 6px;
       word-break: break-all;
-      margin-bottom: 4px;
     }
 
     .file-meta {
       font-size: 0.85em;
-      color: var(--light-text-color);
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
     }
 
+    .file-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .file-meta span i {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Actions Column */
     .file-actions {
       margin-left: 20px;
     }
 
+    /* Action View Button */
     .view-btn {
-      background-color: var(--primary-color);
+      background: linear-gradient(135deg, var(--accent), var(--primary));
       color: white;
-      padding: 8px 16px;
-      border-radius: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
       text-decoration: none;
       font-weight: 600;
       font-size: 0.9em;
-      transition: background-color 0.2s;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px -3px rgba(6, 182, 212, 0.3);
     }
 
     .view-btn:hover {
-      background-color: var(--secondary-color);
+      transform: translateY(-1.5px);
+      box-shadow: 0 8px 18px -3px rgba(6, 182, 212, 0.45);
+      filter: brightness(1.1);
     }
 
+    .view-btn:active {
+      transform: translateY(0.5px);
+    }
+
+    /* Empty State */
     .empty-state {
       text-align: center;
-      padding: 40px;
-      color: var(--light-text-color);
+      padding: 60px 40px;
+      color: var(--text-muted);
     }
 
     .empty-state i {
-      font-size: 3em;
-      margin-bottom: 15px;
+      font-size: 4em;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
       display: block;
+      filter: drop-shadow(0 4px 12px rgba(6, 182, 212, 0.2));
     }
 
-    @media (max-width: 600px) {
-      .container { padding: 25px 15px; }
-      .file-item { flex-direction: column; align-items: flex-start; }
-      .file-icon { margin-bottom: 10px; margin-right: 0; }
-      .file-actions { margin-left: 0; margin-top: 15px; width: 100%; }
-      .view-btn { display: block; text-align: center; }
+    .empty-state p {
+      font-size: 1.1em;
+      font-weight: 500;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 650px) {
+      .container {
+        padding: 35px 20px;
+      }
+      .file-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 18px;
+      }
+      .file-icon {
+        margin-bottom: 12px;
+        margin-right: 0;
+        justify-content: flex-start;
+      }
+      .file-actions {
+        margin-left: 0;
+        margin-top: 18px;
+        width: 100%;
+      }
+      .view-btn {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Aurora Glow Blobs in Background -->
+  <div class="aurora-container">
+    <div class="aurora-blob blob-1"></div>
+    <div class="aurora-blob blob-2"></div>
+  </div>
+
   <div class="container">
     <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Kembali ke Unggah</a>
     
@@ -171,12 +369,24 @@
         <% files.forEach(file => { %>
           <div class="file-item">
             <div class="file-icon">
-              <% if (file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)) { %>
+              <% if (file.name.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i)) { %>
                 <i class="fas fa-file-image"></i>
               <% } else if (file.name.match(/\.pdf$/i)) { %>
                 <i class="fas fa-file-pdf"></i>
-              <% } else if (file.name.match(/\.(doc|docx)$/i)) { %>
+              <% } else if (file.name.match(/\.(doc|docx|odt|rtf)$/i)) { %>
                 <i class="fas fa-file-word"></i>
+              <% } else if (file.name.match(/\.(xls|xlsx|csv|ods)$/i)) { %>
+                <i class="fas fa-file-excel"></i>
+              <% } else if (file.name.match(/\.(ppt|pptx|odp)$/i)) { %>
+                <i class="fas fa-file-powerpoint"></i>
+              <% } else if (file.name.match(/\.(mp4|mkv|avi|mov|webm|flv|wmv|3gp)$/i)) { %>
+                <i class="fas fa-file-video"></i>
+              <% } else if (file.name.match(/\.(mp3|wav|ogg|flac|m4a|aac|wma)$/i)) { %>
+                <i class="fas fa-file-audio"></i>
+              <% } else if (file.name.match(/\.(zip|rar|7z|tar|gz|bz2|xz)$/i)) { %>
+                <i class="fas fa-file-archive"></i>
+              <% } else if (file.name.match(/\.(html|css|js|jsx|ts|tsx|json|py|java|c|cpp|h|cs|sh|bat|php|go|rs|yml|yaml|xml)$/i)) { %>
+                <i class="fas fa-file-code"></i>
               <% } else { %>
                 <i class="fas fa-file-alt"></i>
               <% } %>
