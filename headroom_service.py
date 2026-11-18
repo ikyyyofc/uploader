@@ -73,15 +73,27 @@ _smart_crusher = SmartCrusher()
 _text_crusher = TextCrusher()
 
 
+_DEFAULT_ROUTER_CFG = CompressConfig(
+    compress_user_messages=True,
+    compress_system_messages=True,
+    protect_recent=0,
+    protect_analysis_context=False,
+    min_tokens_to_compress=10,
+    kompress_model="disabled",
+)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Pre-warm Headroom native Rust compressors on startup so first routermod request is instant."""
+    """Pre-warm Headroom ContentRouter and native Rust compressors on startup so first routermod request is instant."""
     try:
         t0 = time.time()
         _text_crusher.compress("warmup line 1\n" * 30)
         _log_compressor.compress("2026-11-18 INFO warmup 1\n" * 30 + "2026-11-18 FATAL err\n")
         _smart_crusher.crush(json.dumps([{"id": i, "v": "ok"} for i in range(20)]))
-        logger.info("Headroom native compressors pre-warmed in %.3fs", time.time() - t0)
+        warm_mixed = "Status:\n" + json.dumps([{"id": i, "s": "ok"} for i in range(30)], indent=2) + "\nDone."
+        compress([{"role": "tool", "tool_call_id": "w1", "content": warm_mixed}], model="gpt-4o", config=_DEFAULT_ROUTER_CFG)
+        logger.info("Headroom ContentRouter & native compressors pre-warmed in %.3fs", time.time() - t0)
     except Exception as exc:
         logger.warning("Warm-up warning: %s", exc)
     yield
@@ -122,6 +134,26 @@ def _compress_single_text(
         return text, None
 
     chosen = strategy.lower().strip() if strategy else "auto"
+
+    # 0. In "auto" mode, run Headroom's official ContentRouter pipeline first
+    #    (handles mixed prose+JSON/logs, error protection, recursive JSON, tabular ingest, SmartCrusher, LogCompressor, etc.)
+    if chosen == "auto":
+        try:
+            r_router = compress(
+                [{"role": "tool", "tool_call_id": "hr_1", "content": text}],
+                model="gpt-4o",
+                config=_DEFAULT_ROUTER_CFG,
+            )
+            if r_router and r_router.messages:
+                routed_text = r_router.messages[0].get("content")
+                routed_transforms = [t for t in (r_router.transforms_applied or []) if t != "router:noop"]
+                if isinstance(routed_text, str) and len(routed_text) < len(text) and routed_transforms:
+                    return routed_text, routed_transforms[0]
+                # If ContentRouter explicitly protected error output, honor that protection
+                if any("protected:error_output" in t for t in routed_transforms):
+                    return text, "router:protected:error_output"
+        except Exception as exc:
+            logger.debug("ContentRouter single-message pass skipped: %s", exc)
 
     # 1. Fast JSON detection
     if chosen == "auto":
@@ -250,7 +282,9 @@ def _compress_text_cached(
         return cached
 
     new_text, label = _compress_single_text(text, strategy=chosen, target_ratio=target_ratio)
-    if label and new_text != text and len(new_text) < len(text):
+    if label == "router:protected:error_output":
+        new_text, new_tok = text, orig_tok
+    elif label and new_text != text and len(new_text) < len(text):
         new_tok = _fast_count_tokens(new_text)
         if new_tok >= orig_tok:
             new_text, label, new_tok = text, None, orig_tok
