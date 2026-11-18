@@ -61,7 +61,7 @@ STATS: dict[str, Any] = {
     "feed": [],
 }
 
-# Official Headroom /v1/compress pipelines (matching headroom/proxy/handlers/openai.py):
+# Official Headroom /v1/compress pipelines (matching headroom/proxy/server.py & headroom/proxy/handlers/openai.py):
 # 1. _NO_CCR_PIPELINE: default marker-free pipeline for gateways like techwiz37/routermod & LiteLLM
 _NO_CCR_PIPELINE = TransformPipeline(
     transforms=[
@@ -70,7 +70,12 @@ _NO_CCR_PIPELINE = TransformPipeline(
                 ccr_inject_marker=False,
                 ccr_enabled=False,
                 enable_code_aware=True,
+                prefer_code_aware_for_code=True,
                 enable_kompress=False,
+                protect_recent_reads_fraction=0.3,
+                search_group_by_file=True,
+                smart_crusher_with_compaction=True,
+                result_cache_disk=True,
             )
         )
     ],
@@ -85,7 +90,12 @@ _CCR_PIPELINE = TransformPipeline(
                 ccr_inject_marker=True,
                 ccr_enabled=True,
                 enable_code_aware=True,
+                prefer_code_aware_for_code=True,
                 enable_kompress=False,
+                protect_recent_reads_fraction=0.3,
+                search_group_by_file=True,
+                smart_crusher_with_compaction=True,
+                result_cache_disk=True,
             )
         )
     ],
