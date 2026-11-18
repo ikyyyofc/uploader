@@ -446,19 +446,14 @@ async function handleCompressRequest(req, res) {
       ? rawInputText.length
       : messages.reduce((acc, m) => acc + (typeof m?.content === "string" ? m.content.length : 0), 0);
 
-    const compressConfig = isSingleTextMode
-      ? {
-          ...(typeof body.config === "object" && body.config ? body.config : {}),
-          strategy,
-          compress_user_messages: body.config?.compress_user_messages ?? true,
-          protect_recent: body.config?.protect_recent ?? 0,
-          protect_analysis_context: body.config?.protect_analysis_context ?? false,
-          min_tokens_to_compress: body.config?.min_tokens_to_compress ?? 10
-        }
-      : {
-          ...(typeof body.config === "object" && body.config ? body.config : {}),
-          ...(body.strategy || req.query.strategy ? { strategy } : {})
-        };
+    const compressConfig = {
+      ...(typeof body.config === "object" && body.config ? body.config : {}),
+      strategy,
+      compress_user_messages: body.config?.compress_user_messages ?? true,
+      protect_recent: body.config?.protect_recent ?? 0,
+      protect_analysis_context: body.config?.protect_analysis_context ?? false,
+      min_tokens_to_compress: body.config?.min_tokens_to_compress ?? 10
+    };
     if (targetRatio !== undefined && !Number.isNaN(targetRatio)) {
       compressConfig.target_ratio = targetRatio;
     }
