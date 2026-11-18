@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ Headroom AI Context Compressor - Ultra Uploader</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Space Grotesk & JetBrains Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    :root {
+      --primary: #8b5cf6;
+      --primary-rgb: 139, 92, 246;
+      --secondary: #ec4899;
+      --secondary-rgb: 236, 72, 153;
+      --accent: #06b6d4;
+      --accent-rgb: 6, 182, 212;
+      --emerald: #00f0b5;
+      --emerald-rgb: 0, 240, 181;
+      --bg: #030712;
+      --card-bg: rgba(17, 24, 39, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --success: #10b981;
+      --error: #ef4444;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.16) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(0, 240, 181, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 40px 18px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .aurora-container {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(140px);
+      opacity: 0.3;
+      mix-blend-mode: screen;
+      animation: floatBlob 25s infinite alternate ease-in-out;
+    }
+
+    .blob-1 {
+      width: 450px;
+      height: 450px;
+      background: var(--primary);
+      top: -10%;
+      left: -10%;
+    }
+
+    .blob-2 {
+      width: 500px;
+      height: 500px;
+      background: var(--emerald);
+      bottom: -15%;
+      right: -10%;
+      animation-duration: 28s;
+    }
+
+    .blob-3 {
+      width: 350px;
+      height: 350px;
+      background: var(--accent);
+      top: 40%;
+      left: 60%;
+      animation-duration: 18s;
+    }
+
+    @keyframes floatBlob {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+      50% { transform: translate(50px, -40px) scale(1.12) rotate(180deg); }
+      100% { transform: translate(-30px, 40px) scale(0.92) rotate(360deg); }
+    }
+
+    @keyframes cardEntrance {
+      from { opacity: 0; transform: translateY(30px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .container {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      padding: 42px 40px;
+      border-radius: 24px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6);
+      max-width: 980px;
+      width: 100%;
+      z-index: 10;
+      position: relative;
+      animation: cardEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      border-radius: 24px 24px 0 0;
+      background: linear-gradient(90deg, var(--emerald), var(--accent), var(--primary), var(--secondary));
+    }
+
+    /* Top Nav & Status Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.92em;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      transition: all 0.25s ease;
+    }
+
+    .nav-link:hover {
+      background: rgba(6, 182, 212, 0.18);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 0.85em;
+      font-weight: 600;
+      background: rgba(0, 240, 181, 0.1);
+      border: 1px solid rgba(0, 240, 181, 0.3);
+      color: var(--emerald);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+    }
+
+    /* Header */
+    .hero-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 2.25em;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 25%, var(--emerald) 70%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    h1 i {
+      background: linear-gradient(135deg, var(--emerald), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 10px rgba(0, 240, 181, 0.35));
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.98em;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .subtitle a {
+      color: var(--emerald);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Mode Tabs */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 6px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.92em;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(6, 182, 212, 0.25));
+      color: #fff;
+      border: 1px solid rgba(0, 240, 181, 0.3);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    }
+
+    .tab-panel {
+      display: none;
+      margin-bottom: 22px;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Sample Presets Bar */
+    .presets-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .presets-label {
+      font-size: 0.82em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .preset-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.82em;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .preset-chip:hover {
+      background: rgba(0, 240, 181, 0.12);
+      border-color: rgba(0, 240, 181, 0.35);
+      color: var(--emerald);
+      transform: translateY(-1px);
+    }
+
+    /* Textarea & Inputs */
+    .code-textarea {
+      width: 100%;
+      min-height: 230px;
+      background: rgba(3, 7, 18, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 16px;
+      color: #e2e8f0;
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+      line-height: 1.55;
+      resize: vertical;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .code-textarea:focus {
+      outline: none;
+      border-color: var(--emerald);
+      box-shadow: 0 0 0 3px rgba(0, 240, 181, 0.12);
+    }
+
+    /* Config Grid */
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+      background: rgba(255, 255, 255, 0.025);
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+    }
+
+    .field-group label {
+      font-size: 0.82em;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-select, .field-input {
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 0.9em;
+      font-weight: 500;
+    }
+
+    .field-select:focus, .field-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* File Drop Zone */
+    .upload-zone {
+      border: 2px dashed rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.02);
+      padding: 34px 24px;
+      border-radius: 16px;
+      cursor: pointer;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--emerald);
+      background: rgba(0, 240, 181, 0.05);
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-zone i {
+      font-size: 2.6em;
+      color: var(--emerald);
+      margin-bottom: 12px;
+    }
+
+    /* Action Button */
+    .compress-btn {
+      background: linear-gradient(135deg, #059669, #06b6d4, #8b5cf6);
+      color: white;
+      padding: 16px 28px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-size: 1.08em;
+      font-weight: 700;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .compress-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(0, 240, 181, 0.45);
+    }
+
+    .compress-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    /* Results Section */
+    .results-panel {
+      display: none;
+      margin-top: 30px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      animation: cardEntrance 0.45s ease forwards;
+    }
+
+    .results-panel.show {
+      display: block;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px 18px;
+      text-align: left;
+    }
+
+    .metric-card.highlight {
+      background: rgba(0, 240, 181, 0.08);
+      border-color: rgba(0, 240, 181, 0.28);
+    }
+
+    .metric-label {
+      font-size: 0.78em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-family: var(--font-display);
+      font-size: 1.65em;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .metric-card.highlight .metric-value {
+      color: var(--emerald);
+    }
+
+    .metric-sub {
+      font-size: 0.8em;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Savings Progress Bar */
+    .savings-bar-wrap {
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .savings-bar-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.86em;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .savings-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .savings-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--emerald), var(--accent), var(--primary));
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Output Header & Actions */
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .output-title {
+      font-family: var(--font-display);
+      font-size: 1.05em;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .output-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      padding: 7px 13px;
+      border-radius: 9px;
+      font-size: 0.83em;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: rgba(6, 182, 212, 0.18);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .ccr-banner {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.88em;
+    }
+
+    .ccr-banner.show {
+      display: flex;
+    }
+
+    /* API Reference Box */
+    .api-docs {
+      margin-top: 34px;
+      padding: 22px;
+      border-radius: 16px;
+      background: rgba(3, 7, 18, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      text-align: left;
+    }
+
+    .api-docs h3 {
+      font-family: var(--font-display);
+      font-size: 1.05em;
+      margin-bottom: 10px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .api-pre {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-family: var(--font-mono);
+      font-size: 0.8em;
+      color: #a7f3d0;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    @media (max-width: 650px) {
+      .container { padding: 28px 18px; }
+      h1 { font-size: 1.75em; }
+      .tabs { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora-container">
+    <div class="aurora-blob blob-1"></div>
+    <div class="aurora-blob blob-2"></div>
+    <div class="aurora-blob blob-3"></div>
+  </div>
+
+  <div class="container">
+    <div class="top-bar">
+      <div class="nav-links">
+        <a href="/" class="nav-link"><i class="fas fa-cloud-upload-alt"></i> Upload File</a>
+        <a href="/files" class="nav-link"><i class="fas fa-folder-open"></i> File Repository</a>
+      </div>
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot"></span>
+        <span>Headroom AI v<%= headroomVersion %> &bull; Ready</span>
+      </div>
+    </div>
+
+    <div class="hero-header">
+      <h1><i class="fas fa-compress-arrows-alt"></i> Headroom Context Compressor</h1>
+      <p class="subtitle">
+        Kompres prompt LLM, output tool, log server, array JSON, source code, dan file hingga <strong>60–95% lebih hemat token</strong> menggunakan <a href="https://github.com/headroomlabs-ai/headroom" target="_blank">headroomlabs-ai/headroom</a>.
+      </p>
+    </div>
+
+    <!-- Mode Tabs -->
+    <div class="tabs">
+      <button type="button" class="tab-btn active" data-tab="tab-text">
+        <i class="fas fa-code"></i> Teks / Log / JSON / Messages
+      </button>
+      <button type="button" class="tab-btn" data-tab="tab-upload">
+        <i class="fas fa-file-upload"></i> Upload File untuk Dikompres
+      </button>
+      <button type="button" class="tab-btn" data-tab="tab-existing">
+        <i class="fas fa-hdd"></i> Pilih dari File Terunggah (<%= files ? files.length : 0 %>)
+      </button>
+    </div>
+
+    <!-- Tab 1: Text / JSON / Logs / Messages -->
+    <div class="tab-panel active" id="tab-text">
+      <div class="presets-bar">
+        <span class="presets-label"><i class="fas fa-magic"></i> Contoh Cepat:</span>
+        <button type="button" class="preset-chip" onclick="loadSample('logs')">
+          <i class="fas fa-terminal"></i> Log Server (FATAL)
+        </button>
+        <button type="button" class="preset-chip" onclick="loadSample('json')">
+          <i class="fas fa-brackets-curly"></i> Array JSON Besar
+        </button>
+        <button type="button" class="preset-chip" onclick="loadSample('code')">
+          <i class="fas fa-file-code"></i> Source Code (AST)
+        </button>
+        <button type="button" class="preset-chip" onclick="loadSample('messages')">
+          <i class="fas fa-comments"></i> OpenAI Chat Messages
+        </button>
+      </div>
+      <textarea id="inputText" class="code-textarea" placeholder="Tempel (paste) log aplikasi, JSON payload, source code, atau array messages OpenAI/Anthropic di sini..."></textarea>
+    </div>
+
+    <!-- Tab 2: Upload File -->
+    <div class="tab-panel" id="tab-upload">
+      <div class="upload-zone" id="compressDropZone">
+        <input type="file" id="compressFileInput" />
+        <i class="fas fa-file-archive"></i>
+        <p style="font-weight: 600; font-size: 1.08em;" id="selectedFileLabel">Seret & Lepas File atau Klik untuk Memilih</p>
+        <span style="font-size: 0.86em; color: var(--text-muted);">Mendukung .log, .json, .txt, .py, .js, .ts, .csv, .md, .diff, .xml, dll.</span>
+      </div>
+    </div>
+
+    <!-- Tab 3: Existing Uploaded File -->
+    <div class="tab-panel" id="tab-existing">
+      <div class="field-group">
+        <label for="existingFileSelect"><i class="fas fa-folder"></i> Pilih File dari Direktori /uploads:</label>
+        <select id="existingFileSelect" class="field-select">
+          <% if (files && files.length > 0) { %>
+            <option value="">-- Pilih file yang sudah diunggah --</option>
+            <% files.forEach(f => { %>
+              <option value="<%= f.name %>"><%= f.name %> (<%= f.size %>)</option>
+            <% }); %>
+          <% } else { %>
+            <option value="">Belum ada file di /uploads</option>
+          <% } %>
+        </select>
+      </div>
+    </div>
+
+    <!-- Compression Options -->
+    <div class="config-grid">
+      <div class="field-group">
+        <label for="modelSelect"><i class="fas fa-robot"></i> Target Model Tokenizer</label>
+        <select id="modelSelect" class="field-select">
+          <option value="gpt-4o" selected>OpenAI GPT-4o / GPT-4.1</option>
+          <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5</option>
+          <option value="claude-opus-4-20250514">Claude Opus 4</option>
+          <option value="gemini-2.0-flash">Google Gemini 2.0 Flash</option>
+          <option value="o3-mini">OpenAI o3-mini</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label for="strategySelect"><i class="fas fa-filter"></i> Strategi Compressor</label>
+        <select id="strategySelect" class="field-select">
+          <option value="auto" selected>Auto (ContentRouter + Smart Detection)</option>
+          <option value="smart_crusher">SmartCrusher (JSON & Array Statistical)</option>
+          <option value="log">LogCompressor (Build & Server Logs)</option>
+          <option value="code">CodeAwareCompressor (AST Tree-Sitter)</option>
+          <option value="search">SearchCompressor (Grep & Search Results)</option>
+          <option value="diff">DiffCompressor (Git Diff & Patches)</option>
+          <option value="text">TextCrusher (General Text Deduplication)</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label for="ratioSelect"><i class="fas fa-sliders-h"></i> Target Keep Ratio</label>
+        <select id="ratioSelect" class="field-select">
+          <option value="" selected>Otomatis (Rekomendasi Headroom)</option>
+          <option value="0.2">Agresif (Simpan ~20%)</option>
+          <option value="0.4">Seimbang (Simpan ~40%)</option>
+          <option value="0.6">Konservatif (Simpan ~60%)</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="button" class="compress-btn" id="runCompressBtn" onclick="runCompression()">
+      <i class="fas fa-bolt"></i>
+      <span id="compressBtnText">Kompres Sekarang dengan Headroom</span>
+    </button>
+
+    <!-- Results Dashboard -->
+    <div class="results-panel" id="resultsPanel">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Tokens Sebelum</div>
+          <div class="metric-value" id="resTokensBefore">0</div>
+          <div class="metric-sub" id="resCharsBefore">0 karakter</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Tokens Sesudah</div>
+          <div class="metric-value" id="resTokensAfter">0</div>
+          <div class="metric-sub" id="resCharsAfter">0 karakter</div>
+        </div>
+        <div class="metric-card highlight">
+          <div class="metric-label">Tokens Dihemat</div>
+          <div class="metric-value" id="resTokensSaved">0</div>
+          <div class="metric-sub" id="resSavingsPct">0% penghematan</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Pipeline & Waktu</div>
+          <div class="metric-value" id="resLatency" style="font-size: 1.3em;">0 ms</div>
+          <div class="metric-sub" id="resTransforms">-</div>
+        </div>
+      </div>
+
+      <div class="savings-bar-wrap">
+        <div class="savings-bar-header">
+          <span>Efisiensi Kompresi Konteks</span>
+          <span id="resRatioLabel" style="color: var(--emerald);">0% Token Dikurangi</span>
+        </div>
+        <div class="savings-track">
+          <div class="savings-fill" id="resSavingsBar"></div>
+        </div>
+      </div>
+
+      <div class="output-header">
+        <div class="output-title">
+          <i class="fas fa-check-circle" style="color: var(--emerald);"></i> Hasil Kompresi Headroom
+        </div>
+        <div class="output-actions">
+          <button type="button" class="action-btn" onclick="toggleOutputView('text')">
+            <i class="fas fa-align-left"></i> Teks Terkompresi
+          </button>
+          <button type="button" class="action-btn" onclick="toggleOutputView('json')">
+            <i class="fas fa-code"></i> Full JSON Response
+          </button>
+          <button type="button" class="action-btn" onclick="copyCompressedOutput()">
+            <i class="fas fa-copy"></i> Salin
+          </button>
+          <button type="button" class="action-btn" onclick="downloadCompressedOutput()">
+            <i class="fas fa-download"></i> Unduh
+          </button>
+        </div>
+      </div>
+
+      <textarea id="outputText" class="code-textarea" readonly></textarea>
+
+      <!-- CCR Reversible Banner -->
+      <div class="ccr-banner" id="ccrBanner">
+        <div>
+          <i class="fas fa-undo-alt" style="color: var(--primary);"></i>
+          <strong>CCR (Compress-Cache-Retrieve) Aktif:</strong> Data asli tersimpan secara lossless dengan hash <code id="ccrHashLabel" style="color: var(--emerald);"></code>
+        </div>
+        <button type="button" class="action-btn" onclick="retrieveOriginalCCR()">
+          <i class="fas fa-search"></i> Retrieve Original via CCR
+        </button>
+      </div>
+    </div>
+
+    <!-- API Quick Reference -->
+    <div class="api-docs">
+      <h3><i class="fas fa-terminal"></i> Endpoint REST API (<code>POST /compress</code> &amp; <code>POST /v1/compress</code>)</h3>
+      <div class="api-pre">curl -X POST http://localhost:7860/compress \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "strategy": "auto",
+    "text": "2026-11-18 INFO step 1 ok\n2026-11-18 INFO step 2 ok\n...\n2026-11-18 FATAL disk full"
+  }'
+
+# Atau format messages LLM standar (OpenAI / Anthropic / headroom-ai SDK):
+curl -X POST http://localhost:7860/compress \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      { "role": "user", "content": "What failed?" },
+      { "role": "tool", "tool_call_id": "c1", "content": "...large tool output..." }
+    ]
+  }'</div>
+    </div>
+  </div>
+
+  <script>
+    let activeTab = 'tab-text';
+    let lastApiResponse = null;
+    let currentOutputView = 'text';
+    let currentCcrHash = null;
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        activeTab = btn.getAttribute('data-tab');
+        document.getElementById(activeTab).classList.add('active');
+      });
+    });
+
+    // File input label update
+    const compressFileInput = document.getElementById('compressFileInput');
+    const selectedFileLabel = document.getElementById('selectedFileLabel');
+    compressFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        const f = e.target.files[0];
+        selectedFileLabel.textContent = `File dipilih: ${f.name} (${(f.size / 1024).toFixed(2)} KB)`;
+      } else {
+        selectedFileLabel.textContent = 'Seret & Lepas File atau Klik untuk Memilih';
+      }
+    });
+
+    // Preset Samples
+    function loadSample(type) {
+      const textarea = document.getElementById('inputText');
+      if (type === 'logs') {
+        const lines = [];
+        for (let i = 1; i <= 160; i++) {
+          const sec = String(i % 60).padStart(2, '0');
+          lines.push(`2026-11-18 15:20:${sec} INFO  [worker-pool-3] Processed batch item #${i} status=200 duration=11ms`);
+        }
+        lines.splice(112, 0, `2026-11-18 15:21:52 ERROR [payment-gateway] Timeout waiting for upstream TLS handshake (retry 3/3)`);
+        lines.push(`2026-11-18 15:22:45 FATAL [database] Connection pool exhausted: max_connections=100 active=100`);
+        textarea.value = lines.join('\n');
+        document.getElementById('strategySelect').value = 'auto';
+      } else if (type === 'json') {
+        const items = [];
+        for (let i = 1; i <= 85; i++) {
+          items.push({
+            id: `srv-${1000 + i}`,
+            hostname: `node-${i}.ap-southeast-1.internal`,
+            status: i === 67 ? 'CRITICAL_OVERLOAD' : 'healthy',
+            cpu_usage_pct: i === 67 ? 99.4 : 14.2,
+            memory_mb: i === 67 ? 32710 : 4096,
+            region: 'ap-southeast-1',
+            version: 'v2.14.0'
+          });
+        }
+        textarea.value = JSON.stringify(items, null, 2);
+        document.getElementById('strategySelect').value = 'auto';
+      } else if (type === 'code') {
+        const funcs = ['import os', 'import json', 'from typing import Dict, Any, List\n'];
+        for (let i = 1; i <= 25; i++) {
+          funcs.push(
+`def transform_record_${i}(payload: Dict[str, Any], strict: bool = True) -> Dict[str, Any]:
+    """Normalize and validate record payload #${i} before database ingestion."""
+    normalized = {}
+    for key, value in payload.items():
+        if value is None and strict:
+            continue
+        normalized[key.strip().lower()] = str(value).strip()
+    normalized[" batch_id"] = ${i}
+    return normalized`
+          );
+        }
+        textarea.value = funcs.join('\n\n');
+        document.getElementById('strategySelect').value = 'code';
+      } else if (type === 'messages') {
+        const logDump = Array.from({ length: 120 }, (_, i) => `INFO [step-${i + 1}] Health check passed OK (latency=9ms)`).join('\n') +
+          '\nFATAL [step-121] Disk quota exceeded on /var/lib/postgresql/data';
+        const msgs = [
+          { role: 'user', content: 'Tolong cek kenapa deployment database gagal dari log berikut.' },
+          {
+            role: 'assistant',
+            content: null,
+            tool_calls: [{ id: 'call_log_1', type: 'function', function: { name: 'fetch_container_logs', arguments: '{"container":"postgres-primary"}' } }]
+          },
+          { role: 'tool', tool_call_id: 'call_log_1', content: logDump }
+        ];
+        textarea.value = JSON.stringify(msgs, null, 2);
+        document.getElementById('strategySelect').value = 'auto';
+      }
+    }
+
+    async function runCompression() {
+      const btn = document.getElementById('runCompressBtn');
+      const btnText = document.getElementById('compressBtnText');
+      const model = document.getElementById('modelSelect').value;
+      const strategy = document.getElementById('strategySelect').value;
+      const targetRatio = document.getElementById('ratioSelect').value;
+
+      btn.disabled = true;
+      btnText.textContent = 'Mengompres dengan Headroom...';
+
+      try {
+        let response;
+        if (activeTab === 'tab-upload') {
+          const file = compressFileInput.files[0];
+          if (!file) {
+            alert('Silakan pilih file terlebih dahulu!');
+            btn.disabled = false;
+            btnText.textContent = 'Kompres Sekarang dengan Headroom';
+            return;
+          }
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('model', model);
+          formData.append('strategy', strategy);
+          if (targetRatio) formData.append('target_ratio', targetRatio);
+
+          response = await fetch('/compress', {
+            method: 'POST',
+            body: formData
+          });
+        } else if (activeTab === 'tab-existing') {
+          const filename = document.getElementById('existingFileSelect').value;
+          if (!filename) {
+            alert('Silakan pilih salah satu file terunggah terlebih dahulu!');
+            btn.disabled = false;
+            btnText.textContent = 'Kompres Sekarang dengan Headroom';
+            return;
+          }
+          response = await fetch('/compress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename,
+              model,
+              strategy,
+              target_ratio: targetRatio ? parseFloat(targetRatio) : undefined
+            })
+          });
+        } else {
+          const rawInput = document.getElementById('inputText').value;
+          if (!rawInput.trim()) {
+            alert('Silakan masukkan teks, log, JSON, atau klik salah satu Contoh Cepat terlebih dahulu!');
+            btn.disabled = false;
+            btnText.textContent = 'Kompres Sekarang dengan Headroom';
+            return;
+          }
+
+          let payload = {
+            model,
+            strategy,
+            target_ratio: targetRatio ? parseFloat(targetRatio) : undefined
+          };
+
+          // Detect if input is an LLM messages JSON array
+          let parsedMessages = null;
+          if (rawInput.trim().startsWith('[')) {
+            try {
+              const candidate = JSON.parse(rawInput);
+              if (Array.isArray(candidate) && candidate.length > 0 && candidate[0] && typeof candidate[0].role === 'string') {
+                parsedMessages = candidate;
+              }
+            } catch (_) {}
+          }
+
+          if (parsedMessages) {
+            payload.messages = parsedMessages;
+          } else {
+            payload.text = rawInput;
+          }
+
+          response = await fetch('/compress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
+
+        const data = await response.json();
+        if (!response.ok || data.error) {
+          throw new Error(data.error?.message || data.error || 'Gagal melakukan kompresi');
+        }
+
+        lastApiResponse = data;
+        renderResults(data);
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = 'Kompres Sekarang dengan Headroom';
+      }
+    }
+
+    function renderResults(data) {
+      const panel = document.getElementById('resultsPanel');
+      panel.classList.add('show');
+
+      const tb = data.tokens_before ?? data.tokensBefore ?? 0;
+      const ta = data.tokens_after ?? data.tokensAfter ?? 0;
+      const ts = data.tokens_saved ?? data.tokensSaved ?? 0;
+      const pct = data.savings_percentage ?? data.savingsPercentage ?? (tb > 0 ? ((ts / tb) * 100).toFixed(1) : 0);
+
+      document.getElementById('resTokensBefore').textContent = tb.toLocaleString('id-ID');
+      document.getElementById('resTokensAfter').textContent = ta.toLocaleString('id-ID');
+      document.getElementById('resTokensSaved').textContent = ts.toLocaleString('id-ID');
+      document.getElementById('resSavingsPct').textContent = `${pct}% token dihemat`;
+      document.getElementById('resCharsBefore').textContent = `${(data.char_count_before ?? 0).toLocaleString('id-ID')} karakter`;
+      document.getElementById('resCharsAfter').textContent = `${(data.char_count_after ?? 0).toLocaleString('id-ID')} karakter`;
+      document.getElementById('resLatency').textContent = `${data.latency_ms ?? 0} ms`;
+
+      const transforms = data.transforms_applied || data.transformsApplied || [];
+      document.getElementById('resTransforms').textContent = transforms.length ? transforms.join(', ') : 'passthrough';
+
+      document.getElementById('resRatioLabel').textContent = `${pct}% Token Dikurangi`;
+      document.getElementById('resSavingsBar').style.width = `${Math.min(100, Math.max(0, parseFloat(pct)))}%`;
+
+      // CCR hashes
+      const hashes = data.ccr_hashes || data.ccrHashes || [];
+      const ccrBanner = document.getElementById('ccrBanner');
+      if (hashes.length > 0) {
+        currentCcrHash = hashes[0];
+        document.getElementById('ccrHashLabel').textContent = currentCcrHash;
+        ccrBanner.classList.add('show');
+      } else {
+        currentCcrHash = null;
+        ccrBanner.classList.remove('show');
+      }
+
+      toggleOutputView('text');
+    }
+
+    function toggleOutputView(mode) {
+      currentOutputView = mode;
+      const out = document.getElementById('outputText');
+      if (!lastApiResponse) return;
+
+      if (mode === 'json') {
+        out.value = JSON.stringify(lastApiResponse, null, 2);
+      } else {
+        if (typeof lastApiResponse.compressed_text === 'string') {
+          out.value = lastApiResponse.compressed_text;
+        } else if (Array.isArray(lastApiResponse.messages)) {
+          if (lastApiResponse.messages.length === 1 && typeof lastApiResponse.messages[0].content === 'string') {
+            out.value = lastApiResponse.messages[0].content;
+          } else {
+            out.value = JSON.stringify(lastApiResponse.messages, null, 2);
+          }
+        } else {
+          out.value = JSON.stringify(lastApiResponse, null, 2);
+        }
+      }
+    }
+
+    function copyCompressedOutput() {
+      const out = document.getElementById('outputText');
+      navigator.clipboard.writeText(out.value);
+      alert('Hasil kompresi berhasil disalin ke clipboard!');
+    }
+
+    function downloadCompressedOutput() {
+      const out = document.getElementById('outputText');
+      const blob = new Blob([out.value], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = currentOutputView === 'json' ? 'headroom-compressed.json' : 'headroom-compressed.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function retrieveOriginalCCR() {
+      if (!currentCcrHash) return;
+      try {
+        const res = await fetch('/compress/retrieve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hash: currentCcrHash })
+        });
+        const data = await res.json();
+        if (data && data.content) {
+          document.getElementById('outputText').value = data.content;
+        } else {
+          alert('Original tidak ditemukan untuk hash: ' + currentCcrHash);
+        }
+      } catch (err) {
+        alert('Gagal retrieve CCR: ' + err.message);
+      }
+    }
+
+    // Load default sample on initial open so user can test immediately
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSample('logs');
+      const params = new URLSearchParams(window.location.search);
+      const preselectedFile = params.get('file');
+      if (preselectedFile) {
+        const existingTabBtn = document.querySelector('.tab-btn[data-tab="tab-existing"]');
+        const selectEl = document.getElementById('existingFileSelect');
+        if (existingTabBtn && selectEl) {
+          existingTabBtn.click();
+          selectEl.value = preselectedFile;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

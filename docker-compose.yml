@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   web:
@@ -6,6 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "7860:7860"
+    environment:
+      - PORT=7860
+      - HEADROOM_PORT=8787
     volumes:
-      - ./uploads:/usr/src/app/uploads  # Mount the uploads directory to persist uploaded files
+      - ./uploads:/usr/src/app/uploads

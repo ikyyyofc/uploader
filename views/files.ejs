@@ -360,7 +360,10 @@
   </div>
 
   <div class="container">
-    <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Kembali ke Unggah</a>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 30px;">
+      <a href="/" class="back-link" style="margin-bottom: 0;"><i class="fas fa-arrow-left"></i> Kembali ke Unggah</a>
+      <a href="/compress" class="back-link" style="margin-bottom: 0; color: #00f0b5;"><i class="fas fa-compress-arrows-alt"></i> Headroom AI Compressor</a>
+    </div>
     
     <h1><i class="fas fa-folder-open"></i> File yang Diunggah</h1>
 
@@ -398,7 +401,8 @@
                 <span><i class="fas fa-clock"></i> <%= new Date(file.mtime).toLocaleString('id-ID') %></span>
               </div>
             </div>
-            <div class="file-actions">
+            <div class="file-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <a href="/compress?file=<%= encodeURIComponent(file.name) %>" class="view-btn" style="background: linear-gradient(135deg, #059669, #06b6d4);"><i class="fas fa-compress-arrows-alt"></i> Kompres</a>
               <a href="<%= file.url %>" target="_blank" class="view-btn"><i class="fas fa-external-link-alt"></i> Lihat</a>
             </div>
           </div>
