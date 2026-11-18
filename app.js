@@ -50,7 +50,7 @@ function resolveHeadroomCommand() {
 }
 
 async function ensureHeadroomService() {
-  if (headroomReadyCache && (await isHeadroomHealthy())) {
+  if (headroomReadyCache && headroomProc && !headroomProc.killed && headroomProc.exitCode === null) {
     return true;
   }
   if (await isHeadroomHealthy()) {
@@ -444,7 +444,7 @@ async function handleCompressRequest(req, res) {
 
     const charCountBefore = isSingleTextMode
       ? rawInputText.length
-      : messages.reduce((acc, m) => acc + (typeof m?.content === "string" ? m.content.length : JSON.stringify(m?.content || "").length), 0);
+      : messages.reduce((acc, m) => acc + (typeof m?.content === "string" ? m.content.length : 0), 0);
 
     const compressConfig = {
       ...(typeof body.config === "object" && body.config ? body.config : {}),
@@ -462,12 +462,23 @@ async function handleCompressRequest(req, res) {
     // so every message field (role, tool_call_id, tool_calls, name) is preserved 1:1 without format-conversion drift.
     let rawData;
     if (!isSingleTextMode) {
-      rawData = await headroomClient.compressRaw({
-        messages,
-        model,
-        ...(tokenBudget ? { token_budget: tokenBudget } : {}),
-        config: compressConfig
-      });
+      try {
+        rawData = await headroomClient.compressRaw({
+          messages,
+          model,
+          ...(tokenBudget ? { token_budget: tokenBudget } : {}),
+          config: compressConfig
+        });
+      } catch (e) {
+        headroomReadyCache = false;
+        await ensureHeadroomService();
+        rawData = await headroomClient.compressRaw({
+          messages,
+          model,
+          ...(tokenBudget ? { token_budget: tokenBudget } : {}),
+          config: compressConfig
+        });
+      }
     } else {
       const sdkResult = await headroomCompress(messages, {
         client: headroomClient,
@@ -495,7 +506,7 @@ async function handleCompressRequest(req, res) {
     const charCountAfter =
       compressedText !== undefined
         ? compressedText.length
-        : compressedMessages.reduce((acc, m) => acc + (typeof m?.content === "string" ? m.content.length : JSON.stringify(m?.content || "").length), 0);
+        : compressedMessages.reduce((acc, m) => acc + (typeof m?.content === "string" ? m.content.length : 0), 0);
 
     const tokensBefore = rawData.tokens_before ?? 0;
     const tokensAfter = rawData.tokens_after ?? 0;
