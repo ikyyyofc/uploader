@@ -2,11 +2,14 @@
 """
 Headroom Compression Microservice & Proxy Backend
 Integrates https://github.com/headroomlabs-ai/headroom (headroom-ai)
-Compatible with the headroom-ai Node.js/TypeScript SDK (/v1/compress, /health, /stats, /v1/retrieve).
+Fully compatible with:
+- techwiz37/routermod (9Router) external Headroom proxy (/v1/compress, /health, /dashboard, /stats, /stats-history, /transformations/feed)
+- headroom-ai Node.js/TypeScript SDK (/v1/compress, /health, /stats, /v1/retrieve)
 """
 
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 import json
 import logging
 import os
@@ -22,27 +25,21 @@ os.environ.setdefault("DO_NOT_TRACK", "1")
 os.environ.setdefault("HEADROOM_BEACON", "off")
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 import uvicorn
 
 import headroom
 from headroom import CompressConfig, compress
 from headroom.transforms.code_compressor import CodeAwareCompressor, detect_language
-from headroom.transforms.content_detector import ContentType, detect_content_type
+from headroom.transforms.content_detector import detect_content_type
 from headroom.transforms.diff_compressor import DiffCompressor
 from headroom.transforms.log_compressor import LogCompressor
 from headroom.transforms.search_compressor import SearchCompressor
-from headroom.transforms.smart_crusher import SmartCrusher, SmartCrusherConfig
+from headroom.transforms.smart_crusher import SmartCrusher
 from headroom.transforms.text_crusher import TextCrusher, TextCrusherConfig
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("headroom-service")
-
-app = FastAPI(
-    title="Headroom Compression Service",
-    description="Context optimization and compression layer for LLM prompts, logs, JSON, code, and files.",
-    version=getattr(headroom, "__version__", "0.44.0"),
-)
 
 START_TIME = time.time()
 CCR_HASH_RE = re.compile(r"hash=([0-9a-fA-F]{12,64})")
@@ -55,6 +52,7 @@ STATS: dict[str, Any] = {
     "total_tokens_after": 0,
     "total_tokens_saved": 0,
     "recent_requests": [],
+    "feed": [],
 }
 
 # Reusable compressor instances
@@ -64,6 +62,29 @@ _search_compressor = SearchCompressor()
 _code_compressor = CodeAwareCompressor()
 _smart_crusher = SmartCrusher()
 _text_crusher = TextCrusher()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Pre-warm Headroom pipeline on startup so the first routermod request (<3000ms timeout) is fast."""
+    try:
+        t0 = time.time()
+        from headroom.compress import _get_pipeline
+
+        pipeline = _get_pipeline()
+        pipeline._get_tokenizer("gpt-4o")
+        logger.info("Headroom pipeline pre-warmed in %.2fs", time.time() - t0)
+    except Exception as exc:
+        logger.warning("Pipeline warm-up warning: %s", exc)
+    yield
+
+
+app = FastAPI(
+    title="Headroom Compression Service",
+    description="Context optimization and compression layer for LLM prompts, logs, JSON, code, and files.",
+    version=getattr(headroom, "__version__", "0.44.0"),
+    lifespan=lifespan,
+)
 
 
 def _count_text_tokens(text: str, model: str = "gpt-4o") -> int:
@@ -108,8 +129,8 @@ def _apply_direct_compressor(
 ) -> tuple[str, str | None]:
     """
     Apply a specific or auto-detected Headroom transform directly when the
-    high-level ContentRouter skips a message (e.g. due to CCR marker gates or short inputs).
-    Returns (compressed_text, transform_label).
+    high-level ContentRouter skips a message.
+    Guarantees len(compressed_text) < len(text) when a transform is returned.
     """
     if not text or not isinstance(text, str) or len(text.strip()) < 40:
         return text, None
@@ -117,7 +138,6 @@ def _apply_direct_compressor(
     chosen = strategy.lower().strip() if strategy else "auto"
 
     if chosen == "auto":
-        # Check if valid JSON array/object
         stripped = text.strip()
         if (stripped.startswith("[") and stripped.endswith("]")) or (
             stripped.startswith("{") and stripped.endswith("}")
@@ -177,7 +197,6 @@ def _apply_direct_compressor(
             res = _code_compressor.compress(text)
             if res and res.compressed and len(res.compressed) < len(text):
                 return res.compressed, f"code_aware:{res.compression_ratio:.2f}"
-            # Fallback to TextCrusher if AST compressor doesn't shrink
             tc_res = _text_crusher.compress(text)
             if tc_res and tc_res.compressed and len(tc_res.compressed) < len(text):
                 return tc_res.compressed, f"text_crusher:{tc_res.compression_ratio:.2f}"
@@ -192,7 +211,6 @@ def _apply_direct_compressor(
     except Exception as exc:
         logger.warning("Direct compressor (%s) warning: %s", chosen, exc)
 
-    # Final fallback: try TextCrusher if nothing compressed yet
     if chosen != "text":
         try:
             res = _text_crusher.compress(text)
@@ -219,14 +237,108 @@ async def health() -> dict[str, Any]:
 @app.get("/stats")
 async def stats() -> dict[str, Any]:
     tb = STATS["total_tokens_before"]
+    ta = STATS["total_tokens_after"]
     ts = STATS["total_tokens_saved"]
     avg_pct = round((ts / tb) * 100, 2) if tb > 0 else 0.0
     return {
         **STATS,
         "average_savings_pct": avg_pct,
+        "tokens": {
+            "before": tb,
+            "after": ta,
+            "saved": ts,
+            "savings_percent": avg_pct,
+        },
+        "requests": {
+            "total": STATS["total_requests"],
+            "compressed": sum(1 for r in STATS["recent_requests"] if r.get("tokens_saved", 0) > 0),
+        },
         "version": getattr(headroom, "__version__", "0.44.0"),
         "uptime_seconds": round(time.time() - START_TIME, 2),
     }
+
+
+@app.get("/stats-history")
+async def stats_history() -> dict[str, Any]:
+    return {
+        "series": STATS["recent_requests"],
+        "total_requests": STATS["total_requests"],
+        "total_tokens_saved": STATS["total_tokens_saved"],
+    }
+
+
+@app.get("/stats-lifetime")
+async def stats_lifetime() -> dict[str, Any]:
+    return await stats()
+
+
+@app.get("/transformations/feed")
+async def transformations_feed() -> dict[str, Any]:
+    return {
+        "items": STATS["feed"],
+        "total": len(STATS["feed"]),
+    }
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard() -> HTMLResponse:
+    """Lightweight live Headroom Dashboard compatible with routermod's /api/headroom/proxy/dashboard."""
+    html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Headroom Proxy Dashboard</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0b0f19; color: #f3f4f6; margin: 0; padding: 32px; }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    h1 { color: #00f0b5; margin-bottom: 8px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px 0; }
+    .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 18px; }
+    .label { font-size: 12px; color: #9ca3af; text-transform: uppercase; }
+    .val { font-size: 28px; font-weight: 700; margin-top: 6px; color: #fff; }
+    .val.green { color: #00f0b5; }
+    table { width: 100%; border-collapse: collapse; background: #111827; border-radius: 12px; overflow: hidden; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #1f2937; font-size: 14px; }
+    th { background: #1f2937; color: #9ca3af; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>⚡ Headroom Compression Proxy Dashboard</h1>
+    <p style="color:#9ca3af">Connected to 9Router / routermod &amp; /compress API</p>
+    <div class="cards">
+      <div class="card"><div class="label">Total Requests</div><div class="val" id="req">0</div></div>
+      <div class="card"><div class="label">Tokens Before</div><div class="val" id="tb">0</div></div>
+      <div class="card"><div class="label">Tokens Saved</div><div class="val green" id="ts">0</div></div>
+      <div class="card"><div class="label">Avg Savings</div><div class="val green" id="pct">0%</div></div>
+    </div>
+    <h3>Recent Compression Requests</h3>
+    <table>
+      <thead><tr><th>Time</th><th>Model</th><th>Before</th><th>After</th><th>Saved</th><th>Transforms</th><th>Latency</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <script>
+    async function load() {
+      try {
+        const res = await fetch('/stats');
+        const d = await res.json();
+        document.getElementById('req').textContent = d.total_requests || 0;
+        document.getElementById('tb').textContent = (d.total_tokens_before || 0).toLocaleString();
+        document.getElementById('ts').textContent = (d.total_tokens_saved || 0).toLocaleString();
+        document.getElementById('pct').textContent = (d.average_savings_pct || 0) + '%';
+        const rows = (d.recent_requests || []).map(r =>
+          `<tr><td>${r.timestamp}</td><td>${r.model}</td><td>${r.tokens_before}</td><td>${r.tokens_after}</td><td style="color:#00f0b5">${r.tokens_saved} (${r.savings_percentage}%)</td><td>${(r.transforms_applied || []).join(', ')}</td><td>${r.latency_ms}ms</td></tr>`
+        ).join('');
+        document.getElementById('rows').innerHTML = rows || '<tr><td colspan="7" style="text-align:center;color:#9ca3af">No requests yet</td></tr>';
+      } catch (e) {}
+    }
+    load();
+    setInterval(load, 3000);
+  </script>
+</body>
+</html>"""
+    return HTMLResponse(content=html)
 
 
 @app.post("/v1/retrieve")
@@ -243,7 +355,6 @@ async def retrieve(request: Request) -> JSONResponse:
             content={"error": {"type": "invalid_request", "message": "Missing required field: hash"}},
         )
 
-    # Check local CCR_STORE or prefix match
     entry = CCR_STORE.get(hash_key)
     if not entry:
         matches = [v for k, v in CCR_STORE.items() if k.startswith(str(hash_key))]
@@ -251,7 +362,6 @@ async def retrieve(request: Request) -> JSONResponse:
             entry = matches[0]
 
     if not entry:
-        # Also check Headroom's internal CCR store if available
         try:
             from headroom.ccr import get_ccr_store
 
@@ -291,6 +401,8 @@ async def handle_compress(request: Request) -> JSONResponse:
         )
 
     messages = body.get("messages")
+    if messages is None and isinstance(body.get("input"), list):
+        messages = body.get("input")
     model = body.get("model") or "gpt-4o"
     token_budget = body.get("token_budget")
     req_config = body.get("config") or {}
@@ -340,8 +452,6 @@ async def handle_compress(request: Request) -> JSONResponse:
     )
 
     model_limit = int(token_budget) if token_budget and int(token_budget) > 0 else 200000
-
-    # If user explicitly forced a specific compressor strategy (not "auto"), run it directly
     forced_strategy = strategy and strategy.lower() not in ("auto", "default", "router")
 
     if not forced_strategy:
@@ -361,42 +471,87 @@ async def handle_compress(request: Request) -> JSONResponse:
         tokens_after = tokens_before
         transforms_applied = []
 
-    # Check if any message was skipped or if forced_strategy is active
-    if forced_strategy or tokens_after >= tokens_before:
-        updated_messages = []
-        any_direct_change = False
-        for idx, orig_msg in enumerate(messages):
-            comp_msg = dict(compressed_messages[idx]) if idx < len(compressed_messages) else dict(orig_msg)
-            role = comp_msg.get("role", "user")
-            content = comp_msg.get("content")
+    # Per-message fallback check for any message left uncompressed by ContentRouter
+    # Strictly preserves message count, order, role, tool_call_id, and all metadata fields required by routermod
+    updated_messages: list[dict[str, Any]] = []
+    any_direct_change = False
 
-            if role == "user" and not compress_user_messages:
-                updated_messages.append(comp_msg)
-                continue
-            if role == "system" and not compress_system_messages:
-                updated_messages.append(comp_msg)
-                continue
+    for idx, orig_msg in enumerate(messages):
+        if not isinstance(orig_msg, dict):
+            updated_messages.append(orig_msg)
+            continue
 
-            if isinstance(content, str) and (forced_strategy or content == orig_msg.get("content")):
-                orig_tok = _count_text_tokens(content, model)
-                if orig_tok >= min_tokens_to_compress:
-                    new_text, label = _apply_direct_compressor(
-                        content,
-                        strategy=strategy if forced_strategy else "auto",
-                        target_ratio=float(target_ratio) if target_ratio is not None else None,
-                    )
-                    if label and new_text != content:
-                        new_tok = _count_text_tokens(new_text, model)
-                        if new_tok < orig_tok:
-                            comp_msg["content"] = new_text
-                            transforms_applied = [t for t in transforms_applied if t != "router:noop"]
-                            transforms_applied.append(f"headroom:{label}")
-                            any_direct_change = True
+        comp_msg = dict(compressed_messages[idx]) if idx < len(compressed_messages) and isinstance(compressed_messages[idx], dict) else dict(orig_msg)
+        # Ensure critical fields from orig_msg are never lost
+        for preserve_key in ("role", "tool_call_id", "tool_calls", "name", "id"):
+            if preserve_key in orig_msg and preserve_key not in comp_msg:
+                comp_msg[preserve_key] = orig_msg[preserve_key]
 
+        role = comp_msg.get("role", "user")
+        content = comp_msg.get("content")
+        orig_content = orig_msg.get("content")
+
+        if role == "user" and not compress_user_messages:
             updated_messages.append(comp_msg)
+            continue
+        if role in ("system", "developer") and not compress_system_messages:
+            updated_messages.append(comp_msg)
+            continue
 
+        # Case A: string content that hasn't been compressed yet
+        if isinstance(content, str) and (forced_strategy or content == orig_content):
+            orig_tok = _count_text_tokens(content, model)
+            if orig_tok >= min_tokens_to_compress:
+                new_text, label = _apply_direct_compressor(
+                    content,
+                    strategy=strategy if forced_strategy else "auto",
+                    target_ratio=float(target_ratio) if target_ratio is not None else None,
+                )
+                if label and new_text != content and len(new_text) < len(content):
+                    new_tok = _count_text_tokens(new_text, model)
+                    if new_tok < orig_tok:
+                        comp_msg["content"] = new_text
+                        transforms_applied = [t for t in transforms_applied if t != "router:noop"]
+                        transforms_applied.append(f"headroom:{label}")
+                        any_direct_change = True
+
+        # Case B: list of content blocks (e.g. OpenAI/Claude [{type: "text", text: "..."}])
+        elif isinstance(content, list):
+            new_blocks = []
+            block_changed = False
+            for b_idx, block in enumerate(content):
+                if isinstance(block, dict) and isinstance(block.get("text"), str):
+                    b_text = block["text"]
+                    orig_b_text = (
+                        orig_content[b_idx].get("text")
+                        if isinstance(orig_content, list) and b_idx < len(orig_content) and isinstance(orig_content[b_idx], dict)
+                        else b_text
+                    )
+                    if forced_strategy or b_text == orig_b_text:
+                        orig_tok = _count_text_tokens(b_text, model)
+                        if orig_tok >= min_tokens_to_compress:
+                            new_text, label = _apply_direct_compressor(
+                                b_text,
+                                strategy=strategy if forced_strategy else "auto",
+                                target_ratio=float(target_ratio) if target_ratio is not None else None,
+                            )
+                            if label and new_text != b_text and len(new_text) < len(b_text):
+                                new_tok = _count_text_tokens(new_text, model)
+                                if new_tok < orig_tok:
+                                    block = {**block, "text": new_text}
+                                    transforms_applied = [t for t in transforms_applied if t != "router:noop"]
+                                    transforms_applied.append(f"headroom:{label}")
+                                    block_changed = True
+                new_blocks.append(block)
+            if block_changed:
+                comp_msg["content"] = new_blocks
+                any_direct_change = True
+
+        updated_messages.append(comp_msg)
+
+    if any_direct_change or len(updated_messages) == len(messages):
+        compressed_messages = updated_messages
         if any_direct_change:
-            compressed_messages = updated_messages
             tokens_before = _count_messages_tokens(messages, model)
             tokens_after = _count_messages_tokens(compressed_messages, model)
 
@@ -404,21 +559,18 @@ async def handle_compress(request: Request) -> JSONResponse:
     if tokens_saved == 0:
         tokens_after = tokens_before
 
-    # Proxy convention expected by headroom-ai npm SDK:
-    # compression_ratio = tokens_after / tokens_before (1.0 = no compression, 0.25 = 75% saved)
     proxy_compression_ratio = round(tokens_after / tokens_before, 4) if tokens_before > 0 else 1.0
     savings_percentage = round((tokens_saved / tokens_before) * 100, 2) if tokens_before > 0 else 0.0
 
-    # Extract any CCR hashes from compressed messages and store originals
     ccr_hashes: list[str] = []
     for idx, m in enumerate(compressed_messages):
-        c = m.get("content")
+        c = m.get("content") if isinstance(m, dict) else None
         if isinstance(c, str):
             found = CCR_HASH_RE.findall(c)
             for h in found:
                 if h not in ccr_hashes:
                     ccr_hashes.append(h)
-                if h not in CCR_STORE and idx < len(messages):
+                if h not in CCR_STORE and idx < len(messages) and isinstance(messages[idx], dict):
                     orig_c = messages[idx].get("content")
                     if isinstance(orig_c, str):
                         CCR_STORE[h] = {
@@ -429,27 +581,23 @@ async def handle_compress(request: Request) -> JSONResponse:
                         }
 
     latency_ms = round((time.time() - t0) * 1000, 2)
+    req_entry = {
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "model": model,
+        "tokens_before": tokens_before,
+        "tokens_after": tokens_after,
+        "tokens_saved": tokens_saved,
+        "savings_percentage": savings_percentage,
+        "transforms_applied": transforms_applied,
+        "latency_ms": latency_ms,
+    }
 
-    # Update global stats
     STATS["total_requests"] += 1
     STATS["total_tokens_before"] += tokens_before
     STATS["total_tokens_after"] += tokens_after
     STATS["total_tokens_saved"] += tokens_saved
-    STATS["recent_requests"] = (
-        [
-            {
-                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                "model": model,
-                "tokens_before": tokens_before,
-                "tokens_after": tokens_after,
-                "tokens_saved": tokens_saved,
-                "savings_percentage": savings_percentage,
-                "transforms_applied": transforms_applied,
-                "latency_ms": latency_ms,
-            }
-        ]
-        + STATS["recent_requests"]
-    )[:25]
+    STATS["recent_requests"] = ([req_entry] + STATS["recent_requests"])[:30]
+    STATS["feed"] = ([req_entry] + STATS["feed"])[:50]
 
     return JSONResponse(
         {
